@@ -8,9 +8,10 @@ project(ti_mspm0_libxr_dev LANGUAGES C CXX ASM)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 include("${CMAKE_SOURCE_DIR}/cmake/LibXR.CMake")
 
@@ -45,7 +46,7 @@ target_compile_options(${PROJECT_NAME}.elf PRIVATE
     -g
     "@${SYSCFG_OUTPUT_DIR}/device.opt"
     $<$<COMPILE_LANGUAGE:C>:-std=gnu11>
-    $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++17>
+    $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++20>
     $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
     $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
     $<$<COMPILE_LANGUAGE:CXX>:-fpermissive>)
@@ -57,7 +58,9 @@ target_link_options(${PROJECT_NAME}.elf PRIVATE
     -mfloat-abi=soft
     --specs=nano.specs
     --specs=nosys.specs
+    -Wl,-e,Reset_Handler
     -Wl,--gc-sections
+    -Wl,--no-warn-rwx-segment
     "-Wl,-Map=${CMAKE_BINARY_DIR}/${PROJECT_NAME}.map"
     "-T${SYSCFG_LINKER_FILE}")
 
