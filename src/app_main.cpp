@@ -48,7 +48,7 @@ extern "C" void app_main()
 
     if (read_status == LibXR::ReadOperation::OperationPollingStatus::DONE)
     {
-      const size_t read_size = uart.read_port_->read_size_;
+     const size_t read_size = read_data.size_;
       if (read_size > 0)
       {
         (void)uart.Write({rx_echo_buffer, read_size}, echo_write_op);
