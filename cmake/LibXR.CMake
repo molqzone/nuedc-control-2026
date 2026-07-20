@@ -1,5 +1,19 @@
-set(LIBXR_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libxr" CACHE PATH "Path to LibXR source tree")
-set(MSPM0_SDK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/mspm0-sdk" CACHE PATH "Path to MSPM0 SDK root")
+set(_default_libxr_dir "${CMAKE_CURRENT_SOURCE_DIR}/libxr")
+if(NOT EXISTS "${_default_libxr_dir}/CMakeLists.txt" AND
+   EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../libxr/CMakeLists.txt")
+    set(_default_libxr_dir "${CMAKE_CURRENT_SOURCE_DIR}/../libxr")
+endif()
+set(LIBXR_DIR "${_default_libxr_dir}" CACHE PATH "Path to LibXR source tree")
+
+set(_default_mspm0_sdk_dir "$ENV{MSPM0_SDK_DIR}")
+if(NOT _default_mspm0_sdk_dir)
+    set(_default_mspm0_sdk_dir "${CMAKE_CURRENT_SOURCE_DIR}/mspm0-sdk")
+endif()
+if(NOT EXISTS "${_default_mspm0_sdk_dir}/source" AND
+   EXISTS "D:/TI/M0_SDK/mspm0_sdk_2_10_00_04/source")
+    set(_default_mspm0_sdk_dir "D:/TI/M0_SDK/mspm0_sdk_2_10_00_04")
+endif()
+set(MSPM0_SDK_DIR "${_default_mspm0_sdk_dir}" CACHE PATH "Path to MSPM0 SDK root")
 
 if(NOT EXISTS "${LIBXR_DIR}/CMakeLists.txt")
     message(FATAL_ERROR "LibXR not found. Please set LIBXR_DIR correctly: ${LIBXR_DIR}")
@@ -7,7 +21,7 @@ endif()
 
 set(LIBXR_SYSTEM None)
 set(LIBXR_DRIVER mspm0)
-set(LIBXR_NO_EIGEN True)
+set(LIBXR_NO_EIGEN False)
 
 if(NOT EXISTS "${MSPM0_SDK_DIR}/source")
     message(FATAL_ERROR "MSPM0 SDK not found. Please set MSPM0_SDK_DIR correctly: ${MSPM0_SDK_DIR}")
@@ -99,7 +113,15 @@ endif()
 add_subdirectory("${LIBXR_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/libxr")
 
 if(TARGET xr)
+    get_target_property(_libxr_sources xr SOURCES)
+    list(REMOVE_ITEM _libxr_sources
+        "${LIBXR_DIR}/src/driver/flash.cpp"
+        "${LIBXR_DIR}/src/middleware/database.cpp"
+        "${LIBXR_DIR}/src/middleware/ramfs.cpp")
+    set_property(TARGET xr PROPERTY SOURCES "${_libxr_sources}")
+
     target_include_directories(xr PUBLIC
+        "${CMAKE_CURRENT_SOURCE_DIR}/src"
         ${MSPM0_COMMON_INCLUDE_DIRS})
 
     target_compile_options(xr PUBLIC

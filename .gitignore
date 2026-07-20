@@ -1,5 +1,9 @@
 /build/
-/.vscode/
+/.vscode/*
+!/.vscode/settings.json
+!/.vscode/tasks.json
+!/.vscode/launch.json
+!/.vscode/jlink-flash.jlink
 *.o
 *.obj
 *.a

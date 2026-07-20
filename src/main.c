@@ -4,12 +4,9 @@
 int main(void)
 {
   SYSCFG_DL_init();
-
-  DL_SYSTICK_init(CPUCLK_FREQ / 1000U);
-  DL_SYSTICK_enableInterrupt();
-  DL_SYSTICK_enable();
-
+  DL_SYSTICK_config(CPUCLK_FREQ / 1000U);
   app_main();
-
-  return 0;
+  for (;;)
+  {
+  }
 }

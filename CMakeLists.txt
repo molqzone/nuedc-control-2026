@@ -18,19 +18,18 @@ include("${CMAKE_SOURCE_DIR}/cmake/LibXR.CMake")
 set(APP_SOURCES
     "${CMAKE_SOURCE_DIR}/src/main.c"
     "${CMAKE_SOURCE_DIR}/src/syscalls_stub.c"
-    "${CMAKE_SOURCE_DIR}/src/app_main.cpp"
+    "${CMAKE_SOURCE_DIR}/APP/app_main.cpp"
     "${MSPM0_STARTUP_FILE}"
     "${SYSCFG_C_FILE}")
 
 add_executable(${PROJECT_NAME}.elf ${APP_SOURCES})
 
 target_include_directories(${PROJECT_NAME}.elf PRIVATE
+    "${CMAKE_SOURCE_DIR}/APP"
     "${CMAKE_SOURCE_DIR}/src"
     ${MSPM0_COMMON_INCLUDE_DIRS})
 
 target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
-    LIBXR_NOT_SUPPORT_MUTI_THREAD=1
-    LIBXR_NO_EIGEN
     LIBXR_DEFAULT_SCALAR=double
     LIBXR_PRINTF_BUFFER_SIZE=128
     LIBXR_LOG_LEVEL=4
@@ -42,7 +41,7 @@ target_compile_options(${PROJECT_NAME}.elf PRIVATE
     ${MSPM0_ARCH_COMPILE_OPTIONS}
     -ffunction-sections
     -fdata-sections
-    -Og
+    -Os
     -g
     "@${SYSCFG_OUTPUT_DIR}/device.opt"
     $<$<COMPILE_LANGUAGE:C>:-std=gnu11>
@@ -51,7 +50,11 @@ target_compile_options(${PROJECT_NAME}.elf PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
     $<$<COMPILE_LANGUAGE:CXX>:-fpermissive>)
 
-target_link_libraries(${PROJECT_NAME}.elf PRIVATE xr)
+target_link_libraries(${PROJECT_NAME}.elf PRIVATE xr m)
+target_compile_options(xr PRIVATE
+    -ffunction-sections
+    -fdata-sections
+    -Os)
 target_link_options(${PROJECT_NAME}.elf PRIVATE
     -mcpu=cortex-m0plus
     -mthumb

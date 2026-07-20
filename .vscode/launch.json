@@ -1,0 +1,49 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "J-Link Debug",
+      "cwd": "${workspaceFolder}",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "jlink",
+      "device": "MSPM0G3507",
+      "interface": "swd",
+      "runToEntryPoint": "main",
+      "executable": "${workspaceFolder}/build/ti_mspm0_libxr_dev.elf",
+      "preLaunchTask": "CMake: Build",
+      "serverpath": "C:/Program Files/SEGGER/JLink_V854/JLinkGDBServerCL.exe",
+      "serverArgs": [
+        "-speed",
+        "4000",
+        "-singlerun",
+        "-nogui"
+      ],
+      "armToolchainPath": "D:/scoop/apps/gcc-arm-none-eabi/current/bin",
+      "gdbPath": "D:/scoop/apps/gcc-arm-none-eabi/current/bin/arm-none-eabi-gdb.exe",
+      "svdFile": "C:/Program Files/SEGGER/Ozone/Config/CPU/Cortex-M0.svd",
+      "showDevDebugOutput": "none"
+    },
+    {
+      "name": "J-Link Attach",
+      "cwd": "${workspaceFolder}",
+      "type": "cortex-debug",
+      "request": "attach",
+      "servertype": "jlink",
+      "device": "MSPM0G3507",
+      "interface": "swd",
+      "executable": "${workspaceFolder}/build/ti_mspm0_libxr_dev.elf",
+      "serverpath": "C:/Program Files/SEGGER/JLink_V854/JLinkGDBServerCL.exe",
+      "serverArgs": [
+        "-speed",
+        "4000",
+        "-singlerun",
+        "-nogui"
+      ],
+      "armToolchainPath": "D:/scoop/apps/gcc-arm-none-eabi/current/bin",
+      "gdbPath": "D:/scoop/apps/gcc-arm-none-eabi/current/bin/arm-none-eabi-gdb.exe",
+      "svdFile": "C:/Program Files/SEGGER/Ozone/Config/CPU/Cortex-M0.svd",
+      "showDevDebugOutput": "none"
+    }
+  ]
+}

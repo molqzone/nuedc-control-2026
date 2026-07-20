@@ -1,0 +1,124 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "SysConfig: Generate",
+      "type": "shell",
+      "command": "D:\\TI\\CCS\\ccs\\utils\\sysconfig_1.28.0\\sysconfig_cli.bat",
+      "args": [
+        "--compiler",
+        "gcc",
+        "--board",
+        "/ti/boards/LP_MSPM0G3507",
+        "--product",
+        "D:/TI/M0_SDK/mspm0_sdk_2_10_00_04/.metadata/product.json",
+        "--output",
+        "${workspaceFolder}/sysconfig",
+        "${workspaceFolder}/sysconfig/untitled.syscfg"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": {
+          "executable": "C:\\Windows\\System32\\cmd.exe",
+          "args": [
+            "/d",
+            "/c"
+          ]
+        }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "CMake: Configure",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "-S",
+        ".",
+        "-B",
+        "build",
+        "-G",
+        "Ninja",
+        "-DCMAKE_BUILD_TYPE=Debug",
+        "-DCMAKE_C_COMPILER=D:/scoop/apps/gcc-arm-none-eabi/current/bin/arm-none-eabi-gcc.exe",
+        "-DCMAKE_CXX_COMPILER=D:/scoop/apps/gcc-arm-none-eabi/current/bin/arm-none-eabi-g++.exe",
+        "-DCMAKE_ASM_COMPILER=D:/scoop/apps/gcc-arm-none-eabi/current/bin/arm-none-eabi-gcc.exe",
+        "-DMSPM0_SDK_DIR=D:/TI/M0_SDK/mspm0_sdk_2_10_00_04"
+      ],
+      "dependsOn": "SysConfig: Generate",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "CMake: Build",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "build",
+        "--parallel"
+      ],
+      "dependsOn": "CMake: Configure",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$gcc"
+    },
+    {
+      "label": "CMake: Clean",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "build",
+        "--target",
+        "clean"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "J-Link: Flash",
+      "type": "process",
+      "command": "C:\\Program Files\\SEGGER\\JLink_V854\\JLink.exe",
+      "args": [
+        "-device",
+        "MSPM0G3507",
+        "-if",
+        "SWD",
+        "-speed",
+        "4000",
+        "-autoconnect",
+        "1",
+        "-CommanderScript",
+        "${workspaceFolder}\\.vscode\\jlink-flash.jlink"
+      ],
+      "dependsOn": "CMake: Build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "J-Link: Ozone",
+      "type": "process",
+      "command": "C:\\Program Files\\SEGGER\\Ozone\\Ozone.exe",
+      "args": [
+        "${workspaceFolder}\\ozone.jdebug"
+      ],
+      "dependsOn": "CMake: Build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}
