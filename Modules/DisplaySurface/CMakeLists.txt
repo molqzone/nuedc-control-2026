@@ -1,12 +1,6 @@
 # CMakeLists.txt for DisplaySurface
 
-# Add module to include path
 target_include_directories(xr PUBLIC ${CMAKE_CURRENT_LIST_DIR})
-
-target_compile_definitions(xr PUBLIC
-  DISPLAYSURFACE_WIDTH=128
-  DISPLAYSURFACE_HEIGHT=32
-)
 
 # Auto-include source files
 file(GLOB MODULE_DISPLAYSURFACE_SRC CONFIGURE_DEPENDS

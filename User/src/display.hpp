@@ -21,6 +21,8 @@ class Display
 
  private:
   static constexpr uint16_t OLED_I2C_ADDRESS = 0x3C;
+  static constexpr uint16_t OLED_WIDTH = 128;
+  static constexpr uint16_t OLED_HEIGHT = 32;
   static constexpr uint32_t DISPLAY_PERIOD_MS = 100;
   static constexpr float RAD_TO_DEG = static_cast<float>(180.0 / LibXR::PI);
   static constexpr const char* OLED_I2C_ALIAS = "i2c_oled";

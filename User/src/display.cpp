@@ -53,9 +53,12 @@ Display::Display()
            LibXR::I2C::Configuration{I2C_1_BUS_SPEED_HZ}),
       application_manager_(),
       hardware_(LibXR::Entry<LibXR::I2C>{i2c_, {OLED_I2C_ALIAS}}),
-      surface_(hardware_, application_manager_, DISPLAY_FRAME_TOPIC, DISPLAY_PERIOD_MS),
-      display_(hardware_, application_manager_, OLED_I2C_ALIAS, OLED_I2C_ADDRESS,
-               DISPLAY_FRAME_TOPIC)
+      surface_(hardware_, application_manager_,
+               DisplaySurface::Config{OLED_WIDTH, OLED_HEIGHT, DISPLAY_FRAME_TOPIC,
+                                      DISPLAY_PERIOD_MS}),
+      display_(hardware_, application_manager_,
+               SSD1306::Config{OLED_I2C_ALIAS, OLED_I2C_ADDRESS, OLED_WIDTH, OLED_HEIGHT,
+                               DISPLAY_FRAME_TOPIC})
 {
   last_render_ms_ = LibXR::Timebase::GetMilliseconds();
   surface_.PublishFullFrame();
