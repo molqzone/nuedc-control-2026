@@ -143,27 +143,6 @@ extern "C" {
 #define UART_0_BAUD_RATE                                               (2000000)
 #define UART_0_IBRD_32_MHZ_2000000_BAUD                                      (1)
 #define UART_0_FBRD_32_MHZ_2000000_BAUD                                      (0)
-/* Defines for ZIGBEE_UART */
-#define ZIGBEE_UART_INST                                                   UART1
-#define ZIGBEE_UART_INST_FREQUENCY                                      32000000
-#define ZIGBEE_UART_INST_IRQHandler                             UART1_IRQHandler
-#define ZIGBEE_UART_INST_INT_IRQN                                 UART1_INT_IRQn
-#define GPIO_ZIGBEE_UART_RX_PORT                                           GPIOA
-#define GPIO_ZIGBEE_UART_TX_PORT                                           GPIOA
-#define GPIO_ZIGBEE_UART_RX_PIN                                    DL_GPIO_PIN_9
-#define GPIO_ZIGBEE_UART_TX_PIN                                    DL_GPIO_PIN_8
-#define GPIO_ZIGBEE_UART_IOMUX_RX                                (IOMUX_PINCM20)
-#define GPIO_ZIGBEE_UART_IOMUX_TX                                (IOMUX_PINCM19)
-#define GPIO_ZIGBEE_UART_IOMUX_RX_FUNC                 IOMUX_PINCM20_PF_UART1_RX
-#define GPIO_ZIGBEE_UART_IOMUX_TX_FUNC                 IOMUX_PINCM19_PF_UART1_TX
-#define ZIGBEE_UART_BAUD_RATE                                             (9600)
-#define ZIGBEE_UART_IBRD_32_MHZ_9600_BAUD                                  (208)
-#define ZIGBEE_UART_FBRD_32_MHZ_9600_BAUD                                   (21)
-
-
-
-
-
 /* Defines for DMA_CH_TX */
 #define DMA_CH_TX_CHAN_ID                                                    (0)
 #define DMA_CH_TX_TRIGGER_SEL_SW                             (DMA_SOFTWARE_TRIG)
@@ -289,7 +268,6 @@ void SYSCFG_DL_MOTOR_PWM_init(void);
 void SYSCFG_DL_I2C_0_init(void);
 void SYSCFG_DL_I2C_1_init(void);
 void SYSCFG_DL_UART_0_init(void);
-void SYSCFG_DL_ZIGBEE_UART_init(void);
 void SYSCFG_DL_DMA_init(void);
 
 
