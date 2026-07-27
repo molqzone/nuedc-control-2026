@@ -4,10 +4,8 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "mspm0_gpio.hpp"
-
-namespace App
-{
+#include "app_framework.hpp"
+#include "gpio.hpp"
 
 class KeyLed
 {
@@ -28,7 +26,7 @@ class KeyLed
     COUNT
   };
 
-  KeyLed();
+  explicit KeyLed(LibXR::HardwareContainer& hw);
 
   void Process();
   bool IsPressed(Key key) const;
@@ -58,16 +56,8 @@ class KeyLed
 
   static constexpr size_t ToIndex(Led led) { return static_cast<size_t>(led); }
 
-  LibXR::MSPM0GPIO key1_;
-  LibXR::MSPM0GPIO key2_;
-  LibXR::MSPM0GPIO key3_;
-  LibXR::MSPM0GPIO key4_;
-  LibXR::MSPM0GPIO led1_;
-  LibXR::MSPM0GPIO led2_;
-  std::array<LibXR::MSPM0GPIO*, KEY_COUNT> keys_;
-  std::array<LibXR::MSPM0GPIO*, LED_COUNT> leds_;
+  std::array<LibXR::GPIO*, KEY_COUNT> keys_;
+  std::array<LibXR::GPIO*, LED_COUNT> leds_;
   std::array<KeyState, KEY_COUNT> key_states_{};
   std::array<bool, LED_COUNT> led_states_{};
 };
-
-}  // namespace App

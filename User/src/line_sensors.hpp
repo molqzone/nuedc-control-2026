@@ -3,15 +3,12 @@
 #include <cstdint>
 
 #include "GreySensor.hpp"
-#include "mspm0_gpio.hpp"
-
-namespace App
-{
+#include "app_framework.hpp"
 
 class LineSensors
 {
  public:
-  LineSensors();
+  explicit LineSensors(LibXR::HardwareContainer& hw);
 
   bool Initialize();
   GreySensor::Sample Read();
@@ -19,15 +16,5 @@ class LineSensors
   int16_t ReadPosition();
 
  private:
-  LibXR::MSPM0GPIO line_ad1_;
-  LibXR::MSPM0GPIO line_ad2_;
-  LibXR::MSPM0GPIO line_ad3_;
-  LibXR::MSPM0GPIO line_ad4_;
-  LibXR::MSPM0GPIO line_ad5_;
-  LibXR::MSPM0GPIO line_ad6_;
-  LibXR::MSPM0GPIO line_ad7_;
-  LibXR::MSPM0GPIO line_ad8_;
   GreySensor grey_sensor_;
 };
-
-}  // namespace App

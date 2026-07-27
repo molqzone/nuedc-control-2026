@@ -1,0 +1,6 @@
+modules:
+- verdancy-org/GreySensor
+- verdancy-org/SSD1306
+- verdancy-org/DisplaySurface
+- xrobot-org/ICM42688
+- xrobot-org/MadgwickAHRS

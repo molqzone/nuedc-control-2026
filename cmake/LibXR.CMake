@@ -116,8 +116,7 @@ if(TARGET xr)
     get_target_property(_libxr_sources xr SOURCES)
     list(REMOVE_ITEM _libxr_sources
         "${LIBXR_DIR}/src/driver/flash.cpp"
-        "${LIBXR_DIR}/src/middleware/database.cpp"
-        "${LIBXR_DIR}/src/middleware/ramfs.cpp")
+        "${LIBXR_DIR}/src/middleware/database.cpp")
     set_property(TARGET xr PROPERTY SOURCES "${_libxr_sources}")
 
     target_include_directories(xr PUBLIC

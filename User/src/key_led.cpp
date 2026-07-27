@@ -1,20 +1,14 @@
 #include "key_led.hpp"
 
 #include "libxr.hpp"
-#include "ti_msp_dl_config.h"
 
-namespace App
-{
-
-KeyLed::KeyLed()
-    : key1_(KEYS_KEY1_PORT, KEYS_KEY1_PIN, KEYS_KEY1_IOMUX),
-      key2_(KEYS_KEY2_PORT, KEYS_KEY2_PIN, KEYS_KEY2_IOMUX),
-      key3_(KEYS_KEY3_PORT, KEYS_KEY3_PIN, KEYS_KEY3_IOMUX),
-      key4_(KEYS_KEY4_PORT, KEYS_KEY4_PIN, KEYS_KEY4_IOMUX),
-      led1_(LEDS_LED1_PORT, LEDS_LED1_PIN, LEDS_LED1_IOMUX),
-      led2_(LEDS_LED2_PORT, LEDS_LED2_PIN, LEDS_LED2_IOMUX),
-      keys_{{&key1_, &key2_, &key3_, &key4_}},
-      leds_{{&led1_, &led2_}}
+KeyLed::KeyLed(LibXR::HardwareContainer& hw)
+    : keys_{{hw.FindOrExit<LibXR::GPIO>({"key1"}),
+             hw.FindOrExit<LibXR::GPIO>({"key2"}),
+             hw.FindOrExit<LibXR::GPIO>({"key3"}),
+             hw.FindOrExit<LibXR::GPIO>({"key4"})}},
+      leds_{{hw.FindOrExit<LibXR::GPIO>({"led1"}),
+             hw.FindOrExit<LibXR::GPIO>({"led2"})}}
 {
   const LibXR::GPIO::Configuration key_config{LibXR::GPIO::Direction::INPUT,
                                               LibXR::GPIO::Pull::UP};
@@ -139,5 +133,3 @@ bool KeyLed::IsLedOn(Led led) const
   const size_t index = ToIndex(led);
   return index < LED_COUNT && led_states_[index];
 }
-
-}  // namespace App

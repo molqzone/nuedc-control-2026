@@ -2,15 +2,14 @@
 
 #include <cstdint>
 
+#include "app_framework.hpp"
+#include "gpio.hpp"
 #include "libxr_def.hpp"
-#include "mspm0_gpio.hpp"
-#include "mspm0_pwm.hpp"
+#include "pwm.hpp"
 #include "quadrature_encoder.hpp"
+#include "ramfs.hpp"
 #include "simple_chassis.hpp"
 #include "simple_wheel.hpp"
-
-namespace App
-{
 
 class Drivebase
 {
@@ -36,10 +35,11 @@ class Drivebase
                                                 0.0F, 0.90F,   false};
   };
 
-  Drivebase();
-  explicit Drivebase(const Configuration& config);
+  explicit Drivebase(LibXR::HardwareContainer& hw);
+  Drivebase(LibXR::HardwareContainer& hw, const Configuration& config);
 
   void Stop();
+  void RegisterCommands(LibXR::RamFS& ramfs);
   LibXR::ErrorCode SetWheelTargets(float left_target_delta, float right_target_delta,
                                    float dt_seconds);
   LibXR::ErrorCode SetOpenLoopDuty(float left_duty, float right_duty, float dt_seconds);
@@ -49,21 +49,23 @@ class Drivebase
   static SimpleWheel::DriverType ToWheelDriver(DriverType driver);
   static SimpleWheel::Configuration MakeWheelConfig(const Configuration& config,
                                                     bool left);
+  static LibXR::GPIO& FindGpio(LibXR::HardwareContainer& hw, const char* alias);
+  static LibXR::PWM& FindPwm(LibXR::HardwareContainer& hw, const char* alias);
   LibXR::ErrorCode Initialize();
   LibXR::ErrorCode EnablePwmOutputs();
   void DisablePwmOutputs();
 
   Configuration config_;
-  LibXR::MSPM0GPIO motor_ain1_;
-  LibXR::MSPM0GPIO motor_ain2_;
-  LibXR::MSPM0GPIO motor_bin1_;
-  LibXR::MSPM0GPIO motor_bin2_;
-  LibXR::MSPM0PWM motor_a_pwm_;
-  LibXR::MSPM0PWM motor_b_pwm_;
-  LibXR::MSPM0GPIO encoder_1a_;
-  LibXR::MSPM0GPIO encoder_1b_;
-  LibXR::MSPM0GPIO encoder_2a_;
-  LibXR::MSPM0GPIO encoder_2b_;
+  LibXR::GPIO& motor_ain1_;
+  LibXR::GPIO& motor_ain2_;
+  LibXR::GPIO& motor_bin1_;
+  LibXR::GPIO& motor_bin2_;
+  LibXR::PWM& motor_a_pwm_;
+  LibXR::PWM& motor_b_pwm_;
+  LibXR::GPIO& encoder_1a_;
+  LibXR::GPIO& encoder_1b_;
+  LibXR::GPIO& encoder_2a_;
+  LibXR::GPIO& encoder_2b_;
   QuadratureEncoder encoder_left_;
   QuadratureEncoder encoder_right_;
   SimpleWheel left_wheel_;
@@ -71,5 +73,3 @@ class Drivebase
   SimpleChassis chassis_;
   bool pwm_enabled_ = false;
 };
-
-}  // namespace App

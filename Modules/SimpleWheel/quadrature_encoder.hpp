@@ -5,9 +5,6 @@
 
 #include "gpio.hpp"
 
-namespace App
-{
-
 class QuadratureEncoder
 {
  public:
@@ -31,5 +28,3 @@ class QuadratureEncoder
   LibXR::GPIO::Callback phase_a_callback_;
   LibXR::GPIO::Callback phase_b_callback_;
 };
-
-}  // namespace App

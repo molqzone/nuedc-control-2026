@@ -4,9 +4,6 @@
 
 #include "pid.hpp"
 
-namespace App
-{
-
 class MotionControl
 {
  public:
@@ -89,5 +86,3 @@ class MotionControl
   uint8_t turn_stable_cycles_ = 0;
   uint16_t turn_elapsed_cycles_ = 0;
 };
-
-}  // namespace App

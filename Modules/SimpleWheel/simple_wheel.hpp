@@ -7,9 +7,6 @@
 #include "pwm.hpp"
 #include "quadrature_encoder.hpp"
 
-namespace App
-{
-
 class SimpleWheel
 {
  public:
@@ -79,5 +76,3 @@ class SimpleWheel
   bool closed_loop_ = true;
   int8_t current_direction_ = 0;
 };
-
-}  // namespace App

@@ -3,9 +3,6 @@
 #include <algorithm>
 #include <cmath>
 
-namespace App
-{
-
 SimpleWheel::SimpleWheel(Hardware hardware)
     : SimpleWheel(hardware, Configuration{})
 {
@@ -244,5 +241,3 @@ LibXR::ErrorCode SimpleWheel::SetDRV8701E(float command)
   }
   return result;
 }
-
-}  // namespace App

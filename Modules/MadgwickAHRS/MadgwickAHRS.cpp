@@ -4,6 +4,26 @@
 
 MadgwickAHRS::MadgwickAHRS(float beta) : beta_(beta) { Reset(); }
 
+MadgwickAHRS::MadgwickAHRS(LibXR::HardwareContainer& hw,
+                           LibXR::ApplicationManager& app, float beta,
+                           const char* gyro_topic_name,
+                           const char* accl_topic_name)
+    : MadgwickAHRS(beta)
+{
+  UNUSED(hw);
+  gyro_topic_ = new LibXR::Topic(
+      LibXR::Topic::CreateTopic<Eigen::Matrix<float, 3, 1>>(gyro_topic_name));
+  accl_topic_ = new LibXR::Topic(
+      LibXR::Topic::CreateTopic<Eigen::Matrix<float, 3, 1>>(accl_topic_name));
+  gyro_sub_ =
+      new LibXR::Topic::ASyncSubscriber<Eigen::Matrix<float, 3, 1>>(*gyro_topic_);
+  accl_sub_ =
+      new LibXR::Topic::ASyncSubscriber<Eigen::Matrix<float, 3, 1>>(*accl_topic_);
+  gyro_sub_->StartWaiting();
+  accl_sub_->StartWaiting();
+  app.Register(*this);
+}
+
 float MadgwickAHRS::InvSqrtf(float value) { return 1.0F / std::sqrt(value); }
 
 float MadgwickAHRS::ResolveDt(float dt_seconds)
@@ -126,10 +146,22 @@ void MadgwickAHRS::Reset()
 {
   quaternion_ = LibXR::Quaternion<float>(1.0F, 0.0F, 0.0F, 0.0F);
   euler_.setZero();
+  gyro_bias_.setZero();
+  gyro_calibration_sum_.setZero();
   previous_wrapped_yaw_deg_ = 0.0F;
   continuous_yaw_deg_ = 0.0F;
+  gyro_calibration_start_ms_ = 0;
+  gyro_calibration_sample_count_ = 0;
+  sample_count_ = 0;
+  gyro_calibration_started_ = false;
+  gyro_calibrated_ = false;
   yaw_initialized_ = false;
   valid_ = false;
+}
+
+void MadgwickAHRS::OnMonitor()
+{
+  (void)UpdateFromTopics();
 }
 
 bool MadgwickAHRS::IsValid() const { return valid_; }
@@ -144,6 +176,69 @@ const Eigen::Matrix<float, 3, 1>& MadgwickAHRS::GetEuler() const { return euler_
 float MadgwickAHRS::GetContinuousYawDegrees() const { return continuous_yaw_deg_; }
 
 void MadgwickAHRS::SetBeta(float beta) { beta_ = beta; }
+
+bool MadgwickAHRS::UpdateFromTopics()
+{
+  if (gyro_sub_ == nullptr || accl_sub_ == nullptr)
+  {
+    return false;
+  }
+
+  bool has_new_data = false;
+  if (gyro_sub_->Available())
+  {
+    gyro_ = gyro_sub_->GetData();
+    gyro_sub_->StartWaiting();
+    has_new_data = true;
+  }
+  if (accl_sub_->Available())
+  {
+    accl_ = accl_sub_->GetData();
+    accl_sub_->StartWaiting();
+    has_new_data = true;
+  }
+  if (!has_new_data || !gyro_.allFinite() || !accl_.allFinite())
+  {
+    return false;
+  }
+
+  const uint32_t now = LibXR::Timebase::GetMilliseconds();
+  if (!gyro_calibrated_)
+  {
+    if (!gyro_calibration_started_)
+    {
+      gyro_calibration_started_ = true;
+      gyro_calibration_start_ms_ = now;
+      gyro_calibration_sum_.setZero();
+      gyro_calibration_sample_count_ = 0;
+      XR_LOG_INFO("Gyro calibration: keep still for 2 seconds.");
+    }
+
+    gyro_calibration_sum_ += gyro_;
+    gyro_calibration_sample_count_++;
+    if (now - gyro_calibration_start_ms_ < GYRO_CALIBRATION_DURATION_MS)
+    {
+      return false;
+    }
+
+    gyro_bias_ =
+        gyro_calibration_sum_ / static_cast<float>(gyro_calibration_sample_count_);
+    gyro_calibrated_ = true;
+    last_update_ms_ = now;
+    XR_LOG_PASS("Gyro bias(rad/s): x=%.6f y=%.6f z=%.6f",
+                static_cast<double>(gyro_bias_.x()),
+                static_cast<double>(gyro_bias_.y()),
+                static_cast<double>(gyro_bias_.z()));
+    return false;
+  }
+
+  const float dt_seconds =
+      last_update_ms_ == 0U ? kDefaultDtSeconds
+                            : static_cast<float>(now - last_update_ms_) * 0.001F;
+  last_update_ms_ = now;
+  sample_count_++;
+  return Update(gyro_ - gyro_bias_, accl_, dt_seconds);
+}
 
 void MadgwickAHRS::UpdateEuler()
 {

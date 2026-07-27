@@ -3,9 +3,6 @@
 #include <algorithm>
 #include <cmath>
 
-namespace App
-{
-
 MotionControl::MotionControl() : MotionControl(Configuration{}) {}
 
 MotionControl::MotionControl(const Configuration& config)
@@ -224,5 +221,3 @@ void MotionControl::SetWheelTargets(float left_target, float right_target,
   right_target_ =
       static_cast<int32_t>(std::lround(std::clamp(right_target, minimum, maximum)));
 }
-
-}  // namespace App

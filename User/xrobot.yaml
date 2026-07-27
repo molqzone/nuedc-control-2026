@@ -1,0 +1,45 @@
+global_settings:
+  monitor_sleep_ms: 1
+modules:
+- id: display_surface
+  name: DisplaySurface
+  constructor_args:
+    config:
+      expr: DisplaySurface::Config{128, 64, "display_frame", 33}
+- id: ssd1306
+  name: SSD1306
+  constructor_args:
+    config:
+      expr: SSD1306::Config{"i2c_oled", 0x3C, 128, 64, "display_frame", 64}
+- id: icm42688
+  name: ICM42688
+  constructor_args:
+    datarate: ICM42688::DataRate::DATA_RATE_1KHZ
+    accl_range: ICM42688::AcclRange::RANGE_16G
+    gyro_range: ICM42688::GyroRange::DPS_2000
+    rotation:
+      w: 1.0
+      x: 0.0
+      y: 0.0
+      z: 0.0
+    enable_clk_in: false
+    gyro_topic_name: icm42688_gyro
+    accl_topic_name: icm42688_accl
+    i2c_address: 0x68
+- id: ahrs
+  name: MadgwickAHRS
+  constructor_args:
+    beta: 0.05
+    gyro_topic_name: icm42688_gyro
+    accl_topic_name: icm42688_accl
+# Board-local User object. It is instantiated here for dependency injection,
+# but its source is not managed as a reusable XRobot module.
+- id: firmware_runtime
+  name: FirmwareRuntime
+  constructor_args:
+    ahrs: '@ahrs'
+    imu: '@icm42688'
+    surface: '@display_surface'
+    display: '@ssd1306'
+    config:
+      expr: FirmwareRuntime::Config{"ramfs", "console", 10, 1000, 100}

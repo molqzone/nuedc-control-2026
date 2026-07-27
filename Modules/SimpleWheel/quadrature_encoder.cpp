@@ -1,8 +1,5 @@
 #include "quadrature_encoder.hpp"
 
-namespace App
-{
-
 namespace
 {
 constexpr int8_t TRANSITION_DELTA[16] = {
@@ -86,5 +83,3 @@ int32_t QuadratureEncoder::GetTotal() const
 {
   return total_.load(std::memory_order_relaxed);
 }
-
-}  // namespace App

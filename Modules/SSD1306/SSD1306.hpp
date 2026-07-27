@@ -4,12 +4,8 @@
 /* === MODULE MANIFEST V2 ===
 module_description: SSD1306 OLED panel backend that subscribes to DisplaySurface frames and flushes over I2C.
 constructor_args:
-  - i2c_alias: "i2c_oled"
-  - address: 0x3C
-  - width: 128
-  - height: 64
-  - frame_topic_name: "display_frame"
-  - chunk_bytes: 64
+  - config:
+      expr: SSD1306::Config{"i2c_oled", 0x3C, 128, 64, "display_frame", 64}
 template_args: []
 required_hardware:
   - i2c_oled

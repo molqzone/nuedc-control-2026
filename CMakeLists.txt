@@ -21,15 +21,11 @@ include("${CMAKE_SOURCE_DIR}/cmake/LibXR.CMake")
 set(FIRMWARE_SOURCES
     "${CMAKE_SOURCE_DIR}/User/main.c"
     "${CMAKE_SOURCE_DIR}/User/app_main.cpp"
-    "${CMAKE_SOURCE_DIR}/User/src/scheduler.cpp"
-    "${CMAKE_SOURCE_DIR}/User/src/motion_control.cpp"
-    "${CMAKE_SOURCE_DIR}/User/src/imu.cpp"
+    "${CMAKE_SOURCE_DIR}/User/src/FirmwareRuntime.cpp"
+    "${CMAKE_SOURCE_DIR}/User/src/drivebase.cpp"
     "${CMAKE_SOURCE_DIR}/User/src/key_led.cpp"
     "${CMAKE_SOURCE_DIR}/User/src/line_sensors.cpp"
-    "${CMAKE_SOURCE_DIR}/User/src/drivebase.cpp"
-    "${CMAKE_SOURCE_DIR}/User/src/display.cpp"
-    "${CMAKE_SOURCE_DIR}/User/src/console.cpp"
-    "${CMAKE_SOURCE_DIR}/User/src/zigbee.cpp"
+    "${CMAKE_SOURCE_DIR}/User/src/motion_control.cpp"
     "${CMAKE_SOURCE_DIR}/Core/syscalls_stub.c"
     "${MSPM0_STARTUP_FILE}"
     "${SYSCFG_C_FILE}")

@@ -2,23 +2,20 @@
 
 #include "ti_msp_dl_config.h"
 
-namespace App
-{
+Drivebase::Drivebase(LibXR::HardwareContainer& hw) : Drivebase(hw, Configuration{}) {}
 
-Drivebase::Drivebase() : Drivebase(Configuration{}) {}
-
-Drivebase::Drivebase(const Configuration& config)
+Drivebase::Drivebase(LibXR::HardwareContainer& hw, const Configuration& config)
     : config_(config),
-      motor_ain1_(MOTOR_AIN1_PORT, MOTOR_AIN1_AIN1_PIN, MOTOR_AIN1_AIN1_IOMUX),
-      motor_ain2_(MOTOR_AIN2_PORT, MOTOR_AIN2_AIN2_PIN, MOTOR_AIN2_AIN2_IOMUX),
-      motor_bin1_(MOTOR_BIN1_PORT, MOTOR_BIN1_BIN1_PIN, MOTOR_BIN1_BIN1_IOMUX),
-      motor_bin2_(MOTOR_BIN2_PORT, MOTOR_BIN2_BIN2_PIN, MOTOR_BIN2_BIN2_IOMUX),
-      motor_a_pwm_({MOTOR_PWM_INST, GPIO_MOTOR_PWM_C3_IDX, MOTOR_PWM_INST_CLK_FREQ}),
-      motor_b_pwm_({MOTOR_PWM_INST, GPIO_MOTOR_PWM_C2_IDX, MOTOR_PWM_INST_CLK_FREQ}),
-      encoder_1a_(ENCODERS_PORT, ENCODERS_E1A_PIN, ENCODERS_E1A_IOMUX),
-      encoder_1b_(ENCODERS_PORT, ENCODERS_E1B_PIN, ENCODERS_E1B_IOMUX),
-      encoder_2a_(ENCODERS_PORT, ENCODERS_E2A_PIN, ENCODERS_E2A_IOMUX),
-      encoder_2b_(ENCODERS_PORT, ENCODERS_E2B_PIN, ENCODERS_E2B_IOMUX),
+      motor_ain1_(FindGpio(hw, "motor_ain1")),
+      motor_ain2_(FindGpio(hw, "motor_ain2")),
+      motor_bin1_(FindGpio(hw, "motor_bin1")),
+      motor_bin2_(FindGpio(hw, "motor_bin2")),
+      motor_a_pwm_(FindPwm(hw, "motor_a_pwm")),
+      motor_b_pwm_(FindPwm(hw, "motor_b_pwm")),
+      encoder_1a_(FindGpio(hw, "encoder_1a")),
+      encoder_1b_(FindGpio(hw, "encoder_1b")),
+      encoder_2a_(FindGpio(hw, "encoder_2a")),
+      encoder_2b_(FindGpio(hw, "encoder_2b")),
       encoder_left_(encoder_1a_, encoder_1b_, config.left_encoder_reversed),
       encoder_right_(encoder_2a_, encoder_2b_, config.right_encoder_reversed),
       left_wheel_({motor_a_pwm_, motor_ain1_, motor_ain2_, encoder_left_},
@@ -79,6 +76,25 @@ const SimpleChassis::Feedback& Drivebase::GetFeedback() const
   return chassis_.GetFeedback();
 }
 
+void Drivebase::RegisterCommands(LibXR::RamFS& ramfs)
+{
+  chassis_.RegisterCommands(
+      ramfs,
+      SimpleChassis::CommandInterface{
+          this,
+          [](void* context, float left, float right, float dt_seconds)
+          {
+            return static_cast<Drivebase*>(context)->SetWheelTargets(left, right,
+                                                                     dt_seconds);
+          },
+          [](void* context, float left, float right, float dt_seconds)
+          {
+            return static_cast<Drivebase*>(context)->SetOpenLoopDuty(left, right,
+                                                                     dt_seconds);
+          },
+          [](void* context) { static_cast<Drivebase*>(context)->Stop(); }});
+}
+
 SimpleWheel::DriverType Drivebase::ToWheelDriver(DriverType driver)
 {
   switch (driver)
@@ -101,6 +117,16 @@ SimpleWheel::Configuration Drivebase::MakeWheelConfig(const Configuration& confi
   wheel_config.max_duty = config.max_duty;
   wheel_config.speed_pid = left ? config.left_speed_pid : config.right_speed_pid;
   return wheel_config;
+}
+
+LibXR::GPIO& Drivebase::FindGpio(LibXR::HardwareContainer& hw, const char* alias)
+{
+  return *hw.FindOrExit<LibXR::GPIO>({alias});
+}
+
+LibXR::PWM& Drivebase::FindPwm(LibXR::HardwareContainer& hw, const char* alias)
+{
+  return *hw.FindOrExit<LibXR::PWM>({alias});
 }
 
 LibXR::ErrorCode Drivebase::Initialize()
@@ -146,5 +172,3 @@ void Drivebase::DisablePwmOutputs()
       DL_TIMERA_CCP2_DIS_OUT_ADV_FORCE_LOW | DL_TIMERA_CCP3_DIS_OUT_ADV_FORCE_LOW);
   pwm_enabled_ = false;
 }
-
-}  // namespace App

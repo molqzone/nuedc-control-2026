@@ -4,10 +4,8 @@
 /* === MODULE MANIFEST V2 ===
 module_description: Framebuffer surface compositor with dirty-frame publishing.
 constructor_args:
-  - width: 128
-  - height: 64
-  - frame_topic_name: "display_frame"
-  - refresh_interval_ms: 33
+  - config:
+      expr: DisplaySurface::Config{128, 64, "display_frame", 33}
 template_args: []
 required_hardware: []
 depends: []
