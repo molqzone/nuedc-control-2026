@@ -23,10 +23,11 @@ class Display
   static constexpr uint16_t OLED_I2C_ADDRESS = 0x3C;
   static constexpr uint16_t OLED_WIDTH = 128;
   static constexpr uint16_t OLED_HEIGHT = 32;
+  static constexpr uint16_t OLED_CHUNK_BYTES = 64;
   static constexpr uint32_t DISPLAY_PERIOD_MS = 100;
   static constexpr float RAD_TO_DEG = static_cast<float>(180.0 / LibXR::PI);
   static constexpr const char* OLED_I2C_ALIAS = "i2c_oled";
-  static constexpr const char* DISPLAY_FRAME_TOPIC = DisplaySurface::DEFAULT_FRAME_TOPIC;
+  static constexpr const char* DISPLAY_FRAME_TOPIC = "display_frame";
 
   void Render(bool imu_online, bool attitude_valid,
               const Eigen::Matrix<float, 3, 1>& euler_rad);

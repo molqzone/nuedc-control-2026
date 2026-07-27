@@ -58,7 +58,7 @@ Display::Display()
                                       DISPLAY_PERIOD_MS}),
       display_(hardware_, application_manager_,
                SSD1306::Config{OLED_I2C_ALIAS, OLED_I2C_ADDRESS, OLED_WIDTH, OLED_HEIGHT,
-                               DISPLAY_FRAME_TOPIC})
+                               DISPLAY_FRAME_TOPIC, OLED_CHUNK_BYTES})
 {
   last_render_ms_ = LibXR::Timebase::GetMilliseconds();
   surface_.PublishFullFrame();

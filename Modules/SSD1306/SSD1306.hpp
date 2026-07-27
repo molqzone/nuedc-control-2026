@@ -35,25 +35,15 @@ depends:
 class SSD1306 : public LibXR::Application
 {
  public:
-  static constexpr std::uint8_t DEFAULT_ADDRESS = 0x3C;
-  static constexpr std::uint16_t DEFAULT_WIDTH = 128;
-  static constexpr std::uint16_t DEFAULT_HEIGHT = 64;
-  static constexpr std::uint16_t DEFAULT_CHUNK_BYTES = 64;
-
   struct Config
   {
-    const char* i2c_alias = "i2c_oled";
-    std::uint8_t address = DEFAULT_ADDRESS;
-    std::uint16_t width = DEFAULT_WIDTH;
-    std::uint16_t height = DEFAULT_HEIGHT;
-    const char* frame_topic_name = DisplaySurface::DEFAULT_FRAME_TOPIC;
-    std::uint16_t chunk_bytes = DEFAULT_CHUNK_BYTES;
+    const char* i2c_alias;
+    std::uint8_t address;
+    std::uint16_t width;
+    std::uint16_t height;
+    const char* frame_topic_name;
+    std::uint16_t chunk_bytes;
   };
-
-  SSD1306(LibXR::HardwareContainer& hw, LibXR::ApplicationManager& app)
-      : SSD1306(hw, app, Config{})
-  {
-  }
 
   SSD1306(LibXR::HardwareContainer& hw, LibXR::ApplicationManager& app,
           Config config)
@@ -82,16 +72,6 @@ class SSD1306 : public LibXR::Application
     {
       XR_LOG_WARN("SSD1306: init failed, will retry");
     }
-  }
-
-  SSD1306(LibXR::HardwareContainer& hw, LibXR::ApplicationManager& app,
-          const char* i2c_alias, std::uint8_t address = DEFAULT_ADDRESS,
-          const char* frame_topic_name = DisplaySurface::DEFAULT_FRAME_TOPIC,
-          std::uint16_t chunk_bytes = DEFAULT_CHUNK_BYTES)
-      : SSD1306(hw, app,
-                Config{i2c_alias, address, DEFAULT_WIDTH, DEFAULT_HEIGHT,
-                       frame_topic_name, chunk_bytes})
-  {
   }
 
   bool IsInitialized() const { return initialized_; }
@@ -158,7 +138,7 @@ class SSD1306 : public LibXR::Application
 
   static constexpr std::size_t COMMAND_PAYLOAD_CHUNK = 16;
   static constexpr std::size_t COMMAND_PACKET_SIZE = COMMAND_PAYLOAD_CHUNK + 1U;
-  static constexpr std::size_t MAX_DATA_PAYLOAD = DEFAULT_CHUNK_BYTES;
+  static constexpr std::size_t MAX_DATA_PAYLOAD = 64;
   static constexpr std::size_t DATA_PACKET_SIZE = MAX_DATA_PAYLOAD + 1U;
   static constexpr std::uint16_t DIRTY_SPLIT_GAP = 16U;
   static constexpr std::uint32_t INIT_RETRY_INTERVAL_MS = 500;
@@ -190,21 +170,13 @@ class SSD1306 : public LibXR::Application
   static std::uint16_t CheckedWidth(std::uint16_t width)
   {
     ASSERT(width != 0U && width <= MAX_WIDTH);
-    if (width == 0U)
-    {
-      return DEFAULT_WIDTH;
-    }
-    return width > MAX_WIDTH ? MAX_WIDTH : width;
+    return width;
   }
 
   static std::uint16_t CheckedHeight(std::uint16_t height)
   {
     ASSERT(height != 0U && height <= MAX_HEIGHT);
-    if (height == 0U)
-    {
-      return DEFAULT_HEIGHT;
-    }
-    return height > MAX_HEIGHT ? MAX_HEIGHT : height;
+    return height;
   }
 
   static std::uint16_t CalculatePages(std::uint16_t height)
@@ -588,12 +560,12 @@ class SSD1306 : public LibXR::Application
     return LibXR::ErrorCode::OK;
   }
 
-  std::uint8_t address_ = DEFAULT_ADDRESS;
-  std::uint16_t width_ = DEFAULT_WIDTH;
-  std::uint16_t height_ = DEFAULT_HEIGHT;
-  std::uint16_t pages_ = CalculatePages(DEFAULT_HEIGHT);
-  std::size_t framebuffer_size_ = CalculateFramebufferSize(DEFAULT_WIDTH, pages_);
-  std::uint16_t chunk_payload_size_ = MAX_DATA_PAYLOAD;
+  std::uint8_t address_ = 0;
+  std::uint16_t width_ = 0;
+  std::uint16_t height_ = 0;
+  std::uint16_t pages_ = 0;
+  std::size_t framebuffer_size_ = 0;
+  std::uint16_t chunk_payload_size_ = 0;
   LibXR::I2C* i2c_ = nullptr;
   LibXR::Topic frame_topic_;
   LibXR::Topic::ASyncSubscriber<DisplaySurface::Frame> frame_sub_;

@@ -26,16 +26,12 @@ depends: []
 class DisplaySurface : public LibXR::Application
 {
  public:
-  static constexpr const char* DEFAULT_FRAME_TOPIC = "display_frame";
-  static constexpr std::uint16_t DEFAULT_WIDTH = 128;
-  static constexpr std::uint16_t DEFAULT_HEIGHT = 64;
-
   struct Config
   {
-    std::uint16_t width = DEFAULT_WIDTH;
-    std::uint16_t height = DEFAULT_HEIGHT;
-    const char* frame_topic_name = DEFAULT_FRAME_TOPIC;
-    std::uint32_t refresh_interval_ms = 33;
+    std::uint16_t width;
+    std::uint16_t height;
+    const char* frame_topic_name;
+    std::uint32_t refresh_interval_ms;
   };
 
   enum class PixelFormat : std::uint8_t
@@ -59,15 +55,10 @@ class DisplaySurface : public LibXR::Application
     bool full_update = true;
   };
 
-  DisplaySurface(LibXR::HardwareContainer& hw, LibXR::ApplicationManager& app)
-      : DisplaySurface(hw, app, Config{})
-  {
-  }
-
   DisplaySurface(LibXR::HardwareContainer& hw, LibXR::ApplicationManager& app,
                  Config config)
-      : width_(CheckedDimension(config.width, DEFAULT_WIDTH)),
-        height_(CheckedDimension(config.height, DEFAULT_HEIGHT)),
+      : width_(CheckedDimension(config.width)),
+        height_(CheckedDimension(config.height)),
         pages_(CalculatePages(height_)),
         framebuffer_size_(CalculateFramebufferSize(width_, pages_)),
         framebuffer_(new std::uint8_t[framebuffer_size_]{}),
@@ -85,14 +76,6 @@ class DisplaySurface : public LibXR::Application
     LibXR::Timer::Add(refresh_timer_);
     LibXR::Timer::Start(refresh_timer_);
     app.Register(*this);
-  }
-
-  DisplaySurface(LibXR::HardwareContainer& hw, LibXR::ApplicationManager& app,
-                 const char* frame_topic_name, std::uint32_t refresh_interval_ms = 33)
-      : DisplaySurface(hw, app,
-                       Config{DEFAULT_WIDTH, DEFAULT_HEIGHT, frame_topic_name,
-                              refresh_interval_ms})
-  {
   }
 
   MonoCanvas& GetCanvas() { return canvas_; }
@@ -125,10 +108,10 @@ class DisplaySurface : public LibXR::Application
   void OnMonitor() override {}
 
  private:
-  static std::uint16_t CheckedDimension(std::uint16_t value, std::uint16_t fallback)
+  static std::uint16_t CheckedDimension(std::uint16_t value)
   {
     ASSERT(value != 0U);
-    return value == 0U ? fallback : value;
+    return value;
   }
 
   static std::uint16_t CalculatePages(std::uint16_t height)
@@ -168,10 +151,10 @@ class DisplaySurface : public LibXR::Application
     frame_topic_.Publish(frame_);
   }
 
-  std::uint16_t width_ = DEFAULT_WIDTH;
-  std::uint16_t height_ = DEFAULT_HEIGHT;
-  std::uint16_t pages_ = CalculatePages(DEFAULT_HEIGHT);
-  std::size_t framebuffer_size_ = CalculateFramebufferSize(DEFAULT_WIDTH, pages_);
+  std::uint16_t width_ = 0;
+  std::uint16_t height_ = 0;
+  std::uint16_t pages_ = 0;
+  std::size_t framebuffer_size_ = 0;
   std::uint8_t* framebuffer_ = nullptr;
   LibXR::Topic frame_topic_;
   MonoCanvas canvas_;
