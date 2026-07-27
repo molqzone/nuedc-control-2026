@@ -54,7 +54,9 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     SYSCFG_DL_SYSCTL_init();
     SYSCFG_DL_MOTOR_PWM_init();
     SYSCFG_DL_I2C_0_init();
+    SYSCFG_DL_I2C_1_init();
     SYSCFG_DL_UART_0_init();
+    SYSCFG_DL_ZIGBEE_UART_init();
     SYSCFG_DL_DMA_init();
     /* Ensure backup structures have no valid state */
 	gMOTOR_PWMBackup.backupRdy 	= false;
@@ -90,14 +92,18 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_GPIO_reset(GPIOB);
     DL_TimerA_reset(MOTOR_PWM_INST);
     DL_I2C_reset(I2C_0_INST);
+    DL_I2C_reset(I2C_1_INST);
     DL_UART_Main_reset(UART_0_INST);
+    DL_UART_Main_reset(ZIGBEE_UART_INST);
 
 
     DL_GPIO_enablePower(GPIOA);
     DL_GPIO_enablePower(GPIOB);
     DL_TimerA_enablePower(MOTOR_PWM_INST);
     DL_I2C_enablePower(I2C_0_INST);
+    DL_I2C_enablePower(I2C_1_INST);
     DL_UART_Main_enablePower(UART_0_INST);
+    DL_UART_Main_enablePower(ZIGBEE_UART_INST);
 
     delay_cycles(POWER_STARTUP_DELAY);
 }
@@ -120,11 +126,25 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
         DL_GPIO_WAKEUP_DISABLE);
     DL_GPIO_enableHiZ(GPIO_I2C_0_IOMUX_SDA);
     DL_GPIO_enableHiZ(GPIO_I2C_0_IOMUX_SCL);
+    DL_GPIO_initPeripheralInputFunctionFeatures(GPIO_I2C_1_IOMUX_SDA,
+        GPIO_I2C_1_IOMUX_SDA_FUNC, DL_GPIO_INVERSION_DISABLE,
+        DL_GPIO_RESISTOR_NONE, DL_GPIO_HYSTERESIS_DISABLE,
+        DL_GPIO_WAKEUP_DISABLE);
+    DL_GPIO_initPeripheralInputFunctionFeatures(GPIO_I2C_1_IOMUX_SCL,
+        GPIO_I2C_1_IOMUX_SCL_FUNC, DL_GPIO_INVERSION_DISABLE,
+        DL_GPIO_RESISTOR_NONE, DL_GPIO_HYSTERESIS_DISABLE,
+        DL_GPIO_WAKEUP_DISABLE);
+    DL_GPIO_enableHiZ(GPIO_I2C_1_IOMUX_SDA);
+    DL_GPIO_enableHiZ(GPIO_I2C_1_IOMUX_SCL);
 
     DL_GPIO_initPeripheralOutputFunction(
         GPIO_UART_0_IOMUX_TX, GPIO_UART_0_IOMUX_TX_FUNC);
     DL_GPIO_initPeripheralInputFunction(
         GPIO_UART_0_IOMUX_RX, GPIO_UART_0_IOMUX_RX_FUNC);
+    DL_GPIO_initPeripheralOutputFunction(
+        GPIO_ZIGBEE_UART_IOMUX_TX, GPIO_ZIGBEE_UART_IOMUX_TX_FUNC);
+    DL_GPIO_initPeripheralInputFunction(
+        GPIO_ZIGBEE_UART_IOMUX_RX, GPIO_ZIGBEE_UART_IOMUX_RX_FUNC);
 
     DL_GPIO_initDigitalOutput(GPIO_GRP_0_PIN_0_IOMUX);
 
@@ -188,16 +208,40 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
 		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
 		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
 
-    DL_GPIO_clearPins(GPIOA, MOTOR_AIN1_AIN1_PIN);
-    DL_GPIO_enableOutput(GPIOA, MOTOR_AIN1_AIN1_PIN);
+    DL_GPIO_initDigitalInputFeatures(KEYS_KEY1_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
+
+    DL_GPIO_initDigitalInputFeatures(KEYS_KEY2_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
+
+    DL_GPIO_initDigitalInputFeatures(KEYS_KEY3_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
+
+    DL_GPIO_initDigitalInputFeatures(KEYS_KEY4_IOMUX,
+		 DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP,
+		 DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE);
+
+    DL_GPIO_initDigitalOutput(LEDS_LED1_IOMUX);
+
+    DL_GPIO_initDigitalOutput(LEDS_LED2_IOMUX);
+
+    DL_GPIO_clearPins(GPIOA, MOTOR_AIN1_AIN1_PIN |
+		LEDS_LED1_PIN);
+    DL_GPIO_enableOutput(GPIOA, MOTOR_AIN1_AIN1_PIN |
+		LEDS_LED1_PIN);
     DL_GPIO_clearPins(GPIOB, GPIO_GRP_0_PIN_0_PIN |
 		MOTOR_AIN2_AIN2_PIN |
 		MOTOR_BIN1_BIN1_PIN |
-		MOTOR_BIN2_BIN2_PIN);
+		MOTOR_BIN2_BIN2_PIN |
+		LEDS_LED2_PIN);
     DL_GPIO_enableOutput(GPIOB, GPIO_GRP_0_PIN_0_PIN |
 		MOTOR_AIN2_AIN2_PIN |
 		MOTOR_BIN1_BIN1_PIN |
-		MOTOR_BIN2_BIN2_PIN);
+		MOTOR_BIN2_BIN2_PIN |
+		LEDS_LED2_PIN);
 
 }
 
@@ -293,6 +337,31 @@ SYSCONFIG_WEAK void SYSCFG_DL_I2C_0_init(void) {
 
 
 }
+static const DL_I2C_ClockConfig gI2C_1ClockConfig = {
+    .clockSel = DL_I2C_CLOCK_BUSCLK,
+    .divideRatio = DL_I2C_CLOCK_DIVIDE_1,
+};
+
+SYSCONFIG_WEAK void SYSCFG_DL_I2C_1_init(void) {
+
+    DL_I2C_setClockConfig(I2C_1_INST,
+        (DL_I2C_ClockConfig *) &gI2C_1ClockConfig);
+    DL_I2C_disableAnalogGlitchFilter(I2C_1_INST);
+
+    /* Configure Controller Mode */
+    DL_I2C_resetControllerTransfer(I2C_1_INST);
+    /* Set frequency to 400000 Hz*/
+    DL_I2C_setTimerPeriod(I2C_1_INST, 7);
+    DL_I2C_setControllerTXFIFOThreshold(I2C_1_INST, DL_I2C_TX_FIFO_LEVEL_EMPTY);
+    DL_I2C_setControllerRXFIFOThreshold(I2C_1_INST, DL_I2C_RX_FIFO_LEVEL_BYTES_1);
+    DL_I2C_enableControllerClockStretching(I2C_1_INST);
+
+
+    /* Enable module */
+    DL_I2C_enableController(I2C_1_INST);
+
+
+}
 
 static const DL_UART_Main_ClockConfig gUART_0ClockConfig = {
     .clockSel    = DL_UART_MAIN_CLOCK_BUSCLK,
@@ -329,6 +398,42 @@ SYSCONFIG_WEAK void SYSCFG_DL_UART_0_init(void)
 
 
     DL_UART_Main_enable(UART_0_INST);
+}
+static const DL_UART_Main_ClockConfig gZIGBEE_UARTClockConfig = {
+    .clockSel    = DL_UART_MAIN_CLOCK_BUSCLK,
+    .divideRatio = DL_UART_MAIN_CLOCK_DIVIDE_RATIO_1
+};
+
+static const DL_UART_Main_Config gZIGBEE_UARTConfig = {
+    .mode        = DL_UART_MAIN_MODE_NORMAL,
+    .direction   = DL_UART_MAIN_DIRECTION_TX_RX,
+    .flowControl = DL_UART_MAIN_FLOW_CONTROL_NONE,
+    .parity      = DL_UART_MAIN_PARITY_NONE,
+    .wordLength  = DL_UART_MAIN_WORD_LENGTH_8_BITS,
+    .stopBits    = DL_UART_MAIN_STOP_BITS_ONE
+};
+
+SYSCONFIG_WEAK void SYSCFG_DL_ZIGBEE_UART_init(void)
+{
+    DL_UART_Main_setClockConfig(ZIGBEE_UART_INST, (DL_UART_Main_ClockConfig *) &gZIGBEE_UARTClockConfig);
+
+    DL_UART_Main_init(ZIGBEE_UART_INST, (DL_UART_Main_Config *) &gZIGBEE_UARTConfig);
+    /*
+     * Configure baud rate by setting oversampling and baud rate divisors.
+     *  Target baud rate: 9600
+     *  Actual baud rate: 9600.24
+     */
+    DL_UART_Main_setOversampling(ZIGBEE_UART_INST, DL_UART_OVERSAMPLING_RATE_16X);
+    DL_UART_Main_setBaudRateDivisor(ZIGBEE_UART_INST, ZIGBEE_UART_IBRD_32_MHZ_9600_BAUD, ZIGBEE_UART_FBRD_32_MHZ_9600_BAUD);
+
+
+    /* Configure Interrupts */
+    DL_UART_Main_enableInterrupt(ZIGBEE_UART_INST,
+                                 DL_UART_MAIN_INTERRUPT_RX |
+                                 DL_UART_MAIN_INTERRUPT_TX);
+
+
+    DL_UART_Main_enable(ZIGBEE_UART_INST);
 }
 
 static const DL_DMA_Config gDMA_CH_TXConfig = {

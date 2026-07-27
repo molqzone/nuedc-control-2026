@@ -112,6 +112,20 @@ extern "C" {
 #define GPIO_I2C_0_IOMUX_SCL                                      (IOMUX_PINCM2)
 #define GPIO_I2C_0_IOMUX_SCL_FUNC                       IOMUX_PINCM2_PF_I2C0_SCL
 
+/* Defines for I2C_1 */
+#define I2C_1_INST                                                          I2C1
+#define I2C_1_INST_IRQHandler                                    I2C1_IRQHandler
+#define I2C_1_INST_INT_IRQN                                        I2C1_INT_IRQn
+#define I2C_1_BUS_SPEED_HZ                                                400000
+#define GPIO_I2C_1_SDA_PORT                                                GPIOB
+#define GPIO_I2C_1_SDA_PIN                                         DL_GPIO_PIN_3
+#define GPIO_I2C_1_IOMUX_SDA                                     (IOMUX_PINCM16)
+#define GPIO_I2C_1_IOMUX_SDA_FUNC                      IOMUX_PINCM16_PF_I2C1_SDA
+#define GPIO_I2C_1_SCL_PORT                                                GPIOB
+#define GPIO_I2C_1_SCL_PIN                                         DL_GPIO_PIN_2
+#define GPIO_I2C_1_IOMUX_SCL                                     (IOMUX_PINCM15)
+#define GPIO_I2C_1_IOMUX_SCL_FUNC                      IOMUX_PINCM15_PF_I2C1_SCL
+
 
 /* Defines for UART_0 */
 #define UART_0_INST                                                        UART0
@@ -129,6 +143,22 @@ extern "C" {
 #define UART_0_BAUD_RATE                                               (2000000)
 #define UART_0_IBRD_32_MHZ_2000000_BAUD                                      (1)
 #define UART_0_FBRD_32_MHZ_2000000_BAUD                                      (0)
+/* Defines for ZIGBEE_UART */
+#define ZIGBEE_UART_INST                                                   UART1
+#define ZIGBEE_UART_INST_FREQUENCY                                      32000000
+#define ZIGBEE_UART_INST_IRQHandler                             UART1_IRQHandler
+#define ZIGBEE_UART_INST_INT_IRQN                                 UART1_INT_IRQn
+#define GPIO_ZIGBEE_UART_RX_PORT                                           GPIOA
+#define GPIO_ZIGBEE_UART_TX_PORT                                           GPIOA
+#define GPIO_ZIGBEE_UART_RX_PIN                                    DL_GPIO_PIN_9
+#define GPIO_ZIGBEE_UART_TX_PIN                                    DL_GPIO_PIN_8
+#define GPIO_ZIGBEE_UART_IOMUX_RX                                (IOMUX_PINCM20)
+#define GPIO_ZIGBEE_UART_IOMUX_TX                                (IOMUX_PINCM19)
+#define GPIO_ZIGBEE_UART_IOMUX_RX_FUNC                 IOMUX_PINCM20_PF_UART1_RX
+#define GPIO_ZIGBEE_UART_IOMUX_TX_FUNC                 IOMUX_PINCM19_PF_UART1_TX
+#define ZIGBEE_UART_BAUD_RATE                                             (9600)
+#define ZIGBEE_UART_IBRD_32_MHZ_9600_BAUD                                  (208)
+#define ZIGBEE_UART_FBRD_32_MHZ_9600_BAUD                                   (21)
 
 
 
@@ -223,6 +253,30 @@ extern "C" {
 /* Defines for AD5: GPIOB.17 with pinCMx 43 on package pin 14 */
 #define LINE_B_AD5_PIN                                          (DL_GPIO_PIN_17)
 #define LINE_B_AD5_IOMUX                                         (IOMUX_PINCM43)
+/* Defines for KEY1: GPIOB.25 with pinCMx 56 on package pin 27 */
+#define KEYS_KEY1_PORT                                                   (GPIOB)
+#define KEYS_KEY1_PIN                                           (DL_GPIO_PIN_25)
+#define KEYS_KEY1_IOMUX                                          (IOMUX_PINCM56)
+/* Defines for KEY2: GPIOA.14 with pinCMx 36 on package pin 7 */
+#define KEYS_KEY2_PORT                                                   (GPIOA)
+#define KEYS_KEY2_PIN                                           (DL_GPIO_PIN_14)
+#define KEYS_KEY2_IOMUX                                          (IOMUX_PINCM36)
+/* Defines for KEY3: GPIOB.24 with pinCMx 52 on package pin 23 */
+#define KEYS_KEY3_PORT                                                   (GPIOB)
+#define KEYS_KEY3_PIN                                           (DL_GPIO_PIN_24)
+#define KEYS_KEY3_IOMUX                                          (IOMUX_PINCM52)
+/* Defines for KEY4: GPIOA.15 with pinCMx 37 on package pin 8 */
+#define KEYS_KEY4_PORT                                                   (GPIOA)
+#define KEYS_KEY4_PIN                                           (DL_GPIO_PIN_15)
+#define KEYS_KEY4_IOMUX                                          (IOMUX_PINCM37)
+/* Defines for LED1: GPIOA.21 with pinCMx 46 on package pin 17 */
+#define LEDS_LED1_PORT                                                   (GPIOA)
+#define LEDS_LED1_PIN                                           (DL_GPIO_PIN_21)
+#define LEDS_LED1_IOMUX                                          (IOMUX_PINCM46)
+/* Defines for LED2: GPIOB.18 with pinCMx 44 on package pin 15 */
+#define LEDS_LED2_PORT                                                   (GPIOB)
+#define LEDS_LED2_PIN                                           (DL_GPIO_PIN_18)
+#define LEDS_LED2_IOMUX                                          (IOMUX_PINCM44)
 
 
 /* clang-format on */
@@ -233,7 +287,9 @@ void SYSCFG_DL_GPIO_init(void);
 void SYSCFG_DL_SYSCTL_init(void);
 void SYSCFG_DL_MOTOR_PWM_init(void);
 void SYSCFG_DL_I2C_0_init(void);
+void SYSCFG_DL_I2C_1_init(void);
 void SYSCFG_DL_UART_0_init(void);
+void SYSCFG_DL_ZIGBEE_UART_init(void);
 void SYSCFG_DL_DMA_init(void);
 
 

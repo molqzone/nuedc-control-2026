@@ -259,6 +259,12 @@ class ICM42688 : public LibXR::Application
   float GetTemperature() const { return temperature_; }
   const Eigen::Matrix<float, 3, 1>& GetGyro() const { return gyro_data_; }
   const Eigen::Matrix<float, 3, 1>& GetAccl() const { return accl_data_; }
+  float GetSampleIntervalSeconds() const
+  {
+    const float actual_dt =
+        static_cast<float>(dt_us_.load(std::memory_order_relaxed)) / 1000000.0F;
+    return actual_dt > 0.0F ? actual_dt : GetIdealIntervalSeconds();
+  }
 
   void OnMonitor() override
   {

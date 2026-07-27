@@ -19,13 +19,17 @@ const GPIO6 = GPIO.addInstance();
 const GPIO7 = GPIO.addInstance();
 const GPIO8 = GPIO.addInstance();
 const GPIO9 = GPIO.addInstance();
+const GPIO10 = GPIO.addInstance();
+const GPIO11 = GPIO.addInstance();
 const DMA   = scripting.addModule("/ti/driverlib/DMA");
 const I2C   = scripting.addModule("/ti/driverlib/I2C", {}, false);
 const I2C1  = I2C.addInstance();
+const I2C2  = I2C.addInstance();
 const PWM   = scripting.addModule("/ti/driverlib/PWM", {}, false);
 const PWM1  = PWM.addInstance();
 const UART  = scripting.addModule("/ti/driverlib/UART", {}, false);
 const UART1 = UART.addInstance();
+const UART2 = UART.addInstance();
 
 /**
  * Write custom configuration values to the imported modules.
@@ -115,6 +119,34 @@ GPIO9.associatedPins[0].direction           = "INPUT";
 GPIO9.associatedPins[0].internalResistor    = "PULL_UP";
 GPIO9.associatedPins[0].pin.$assign         = "PB6";
 
+GPIO10.$name = "KEYS";
+GPIO10.associatedPins.create(4);
+GPIO10.associatedPins[0].$name            = "KEY1";
+GPIO10.associatedPins[0].direction        = "INPUT";
+GPIO10.associatedPins[0].internalResistor = "PULL_UP";
+GPIO10.associatedPins[0].pin.$assign      = "PB25";
+GPIO10.associatedPins[1].$name            = "KEY2";
+GPIO10.associatedPins[1].direction        = "INPUT";
+GPIO10.associatedPins[1].internalResistor = "PULL_UP";
+GPIO10.associatedPins[1].pin.$assign      = "PA14";
+GPIO10.associatedPins[2].$name            = "KEY3";
+GPIO10.associatedPins[2].direction        = "INPUT";
+GPIO10.associatedPins[2].internalResistor = "PULL_UP";
+GPIO10.associatedPins[2].pin.$assign      = "PB24";
+GPIO10.associatedPins[3].$name            = "KEY4";
+GPIO10.associatedPins[3].direction        = "INPUT";
+GPIO10.associatedPins[3].internalResistor = "PULL_UP";
+GPIO10.associatedPins[3].pin.$assign      = "PA15";
+
+GPIO11.$name = "LEDS";
+GPIO11.associatedPins.create(2);
+GPIO11.associatedPins[0].$name       = "LED1";
+GPIO11.associatedPins[0].direction   = "OUTPUT";
+GPIO11.associatedPins[0].pin.$assign = "PA21";
+GPIO11.associatedPins[1].$name       = "LED2";
+GPIO11.associatedPins[1].direction   = "OUTPUT";
+GPIO11.associatedPins[1].pin.$assign = "PB18";
+
 DMA.associatedChannels.create(2);
 DMA.associatedChannels[0].$name              = "DMA_CH_TX";
 DMA.associatedChannels[0].srcLength          = "BYTE";
@@ -134,6 +166,16 @@ I2C1.peripheral.sdaPin.$assign = "PA0";
 I2C1.peripheral.sclPin.$assign = "PA1";
 I2C1.sdaPinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric4";
 I2C1.sclPinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric5";
+
+I2C2.$name                     = "I2C_1";
+I2C2.basicEnableController     = true;
+I2C2.basicControllerBusSpeed   = 400000;
+I2C2.advAnalogGlitchFilter     = "DISABLED";
+I2C2.peripheral.$assign        = "I2C1";
+I2C2.peripheral.sdaPin.$assign = "PB3";
+I2C2.peripheral.sclPin.$assign = "PB2";
+I2C2.sdaPinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric6";
+I2C2.sclPinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric7";
 
 const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
 
@@ -158,6 +200,14 @@ UART1.peripheral.rxPin.$assign = "PA11";
 UART1.txPinConfig.$name = "ti_driverlib_gpio_GPIOPinGeneric0";
 UART1.rxPinConfig.$name = "ti_driverlib_gpio_GPIOPinGeneric1";
 
+UART2.$name             = "ZIGBEE_UART";
+UART2.enabledInterrupts = ["RX","TX"];
+UART2.targetBaudRate    = 9600;
+UART2.peripheral.txPin.$assign = "PA8";
+UART2.peripheral.rxPin.$assign = "PA9";
+UART2.txPinConfig.$name = "ti_driverlib_gpio_GPIOPinGeneric12";
+UART2.rxPinConfig.$name = "ti_driverlib_gpio_GPIOPinGeneric13";
+
 /**
  * Pinmux solution for unlocked pins/peripherals. This ensures that minor changes to the automatic solver in a future
  * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
@@ -169,3 +219,4 @@ Board.peripheral.swclkPin.$suggestSolution   = "j25_expansion.16";
 Board.peripheral.swdioPin.$suggestSolution   = "j25_expansion.14";
 SYSCTL.peripheral.$suggestSolution           = "SYSCTL";
 UART1.peripheral.$suggestSolution            = "UART0";
+UART2.peripheral.$suggestSolution            = "UART1";

@@ -11,8 +11,7 @@ namespace App
 class QuadratureEncoder
 {
  public:
-  QuadratureEncoder(LibXR::GPIO& phase_a, LibXR::GPIO& phase_b,
-                    bool reversed = false);
+  QuadratureEncoder(LibXR::GPIO& phase_a, LibXR::GPIO& phase_b, bool reversed = false);
 
   LibXR::ErrorCode Initialize();
   int32_t TakeDelta();

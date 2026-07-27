@@ -13,27 +13,40 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
+set(LIBXR_LOG_LEVEL -1)
+set(LIBXR_LOG_OUTPUT_LEVEL -1)
+
 include("${CMAKE_SOURCE_DIR}/cmake/LibXR.CMake")
 
-set(APP_SOURCES
-    "${CMAKE_SOURCE_DIR}/src/main.c"
-    "${CMAKE_SOURCE_DIR}/src/syscalls_stub.c"
-    "${CMAKE_SOURCE_DIR}/APP/app_main.cpp"
+set(FIRMWARE_SOURCES
+    "${CMAKE_SOURCE_DIR}/User/main.c"
+    "${CMAKE_SOURCE_DIR}/User/app_main.cpp"
+    "${CMAKE_SOURCE_DIR}/User/src/scheduler.cpp"
+    "${CMAKE_SOURCE_DIR}/User/src/motion_control.cpp"
+    "${CMAKE_SOURCE_DIR}/User/src/imu.cpp"
+    "${CMAKE_SOURCE_DIR}/User/src/key_led.cpp"
+    "${CMAKE_SOURCE_DIR}/User/src/line_sensors.cpp"
+    "${CMAKE_SOURCE_DIR}/User/src/drivebase.cpp"
+    "${CMAKE_SOURCE_DIR}/User/src/display.cpp"
+    "${CMAKE_SOURCE_DIR}/User/src/console.cpp"
+    "${CMAKE_SOURCE_DIR}/User/src/zigbee.cpp"
+    "${CMAKE_SOURCE_DIR}/Core/syscalls_stub.c"
     "${MSPM0_STARTUP_FILE}"
     "${SYSCFG_C_FILE}")
 
-add_executable(${PROJECT_NAME}.elf ${APP_SOURCES})
+add_executable(${PROJECT_NAME}.elf ${FIRMWARE_SOURCES})
 
 target_include_directories(${PROJECT_NAME}.elf PRIVATE
-    "${CMAKE_SOURCE_DIR}/APP"
-    "${CMAKE_SOURCE_DIR}/src"
+    "${CMAKE_SOURCE_DIR}/Core"
+    "${CMAKE_SOURCE_DIR}/User"
+    "${CMAKE_SOURCE_DIR}/User/src"
     ${MSPM0_COMMON_INCLUDE_DIRS})
 
 target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
     LIBXR_DEFAULT_SCALAR=double
     LIBXR_PRINTF_BUFFER_SIZE=128
-    LIBXR_LOG_LEVEL=4
-    LIBXR_LOG_OUTPUT_LEVEL=4
+    LIBXR_LOG_LEVEL=${LIBXR_LOG_LEVEL}
+    LIBXR_LOG_OUTPUT_LEVEL=${LIBXR_LOG_OUTPUT_LEVEL}
     XR_LOG_MESSAGE_MAX_LEN=64
     ${MSPM0_COMMON_COMPILE_DEFINITIONS})
 

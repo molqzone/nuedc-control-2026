@@ -1,7 +1,7 @@
 [submodule "libxr"]
 	path = libxr
-	url = https://github.com/Jiu-xiao/libxr.git
-	branch = master
+	url = https://github.com/molqzone/libxr.git
+	branch = codex/mspm0-driver-support
 [submodule "mspm0-sdk"]
 	path = mspm0-sdk
 	url = https://github.com/TexasInstruments/mspm0-sdk

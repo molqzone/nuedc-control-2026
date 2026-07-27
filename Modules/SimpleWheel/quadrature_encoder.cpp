@@ -6,27 +6,25 @@ namespace App
 namespace
 {
 constexpr int8_t TRANSITION_DELTA[16] = {
-    0,  1, -1, 0, -1, 0, 0,  1,
-    1,  0, 0,  -1, 0, -1, 1, 0,
+    0, 1, -1, 0, -1, 0, 0, 1, 1, 0, 0, -1, 0, -1, 1, 0,
 };
 }  // namespace
 
-QuadratureEncoder::QuadratureEncoder(LibXR::GPIO& phase_a,
-                                     LibXR::GPIO& phase_b, bool reversed)
+QuadratureEncoder::QuadratureEncoder(LibXR::GPIO& phase_a, LibXR::GPIO& phase_b,
+                                     bool reversed)
     : phase_a_(phase_a), phase_b_(phase_b), reversed_(reversed)
 {
 }
 
 uint8_t QuadratureEncoder::ReadState() const
 {
-  return static_cast<uint8_t>((phase_a_.Read() ? 2U : 0U) |
-                              (phase_b_.Read() ? 1U : 0U));
+  return static_cast<uint8_t>((phase_a_.Read() ? 2U : 0U) | (phase_b_.Read() ? 1U : 0U));
 }
 
 LibXR::ErrorCode QuadratureEncoder::Initialize()
 {
-  constexpr LibXR::GPIO::Configuration INPUT_CONFIG = {
-      LibXR::GPIO::Direction::INPUT, LibXR::GPIO::Pull::NONE};
+  constexpr LibXR::GPIO::Configuration INPUT_CONFIG = {LibXR::GPIO::Direction::INPUT,
+                                                       LibXR::GPIO::Pull::NONE};
   constexpr LibXR::GPIO::Configuration INTERRUPT_CONFIG = {
       LibXR::GPIO::Direction::FALL_RISING_INTERRUPT, LibXR::GPIO::Pull::NONE};
 
@@ -55,8 +53,7 @@ LibXR::ErrorCode QuadratureEncoder::Initialize()
   return phase_b_.SetConfig(INTERRUPT_CONFIG);
 }
 
-void QuadratureEncoder::OnEdgeStatic(bool in_isr,
-                                     QuadratureEncoder* encoder)
+void QuadratureEncoder::OnEdgeStatic(bool in_isr, QuadratureEncoder* encoder)
 {
   UNUSED(in_isr);
   encoder->OnEdge();

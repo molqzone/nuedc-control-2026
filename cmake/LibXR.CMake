@@ -121,7 +121,7 @@ if(TARGET xr)
     set_property(TARGET xr PROPERTY SOURCES "${_libxr_sources}")
 
     target_include_directories(xr PUBLIC
-        "${CMAKE_CURRENT_SOURCE_DIR}/src"
+        "${CMAKE_CURRENT_SOURCE_DIR}/Core"
         ${MSPM0_COMMON_INCLUDE_DIRS})
 
     target_compile_options(xr PUBLIC
