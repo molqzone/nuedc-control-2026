@@ -57,7 +57,7 @@ class SimpleDicision : public LibXR::Application
         line_width_tolerance_mm_(line_width_tolerance_mm),
         wheel_diameter_mm_(wheel_diameter_mm),
         encoder_counts_per_revolution_(encoder_counts_per_revolution),
-        wheel_circumference_mm_(wheel_diameter_mm * PI_FLOAT),
+        wheel_circumference_mm_(wheel_diameter_mm * static_cast<float>(LibXR::PI)),
         side_target_mm_(outer_square_side_mm - line_width_mm),
         drive_command_(
             LibXR::RamFS::CreateCommand<SimpleDicision*>("drive", DriveCommand, this))
@@ -125,7 +125,6 @@ class SimpleDicision : public LibXR::Application
   }
 
  private:
-  static constexpr float PI_FLOAT = 3.14159265358979323846F;
   static constexpr uint8_t SIDE_COUNT = 4;
 
   static int DriveCommand(SimpleDicision* self, int argc, char** argv)
