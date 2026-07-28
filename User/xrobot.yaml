@@ -150,7 +150,6 @@ modules:
       i_limit: 0.0
       out_limit: 30.0
       cycle: false
-    base_target: 30
     max_wheel_target: 60
     outer_loop_divider: 2
     max_control_dt_ms: 100

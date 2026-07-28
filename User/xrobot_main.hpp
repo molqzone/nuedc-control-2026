@@ -95,7 +95,6 @@ static void XRobotMain(LibXR::HardwareContainer &hw) {
       10,
       100,
       {1.0, 3.0, 0.0, 0.0, 0.0, 30.0, false},
-      30,
       60,
       2,
       100

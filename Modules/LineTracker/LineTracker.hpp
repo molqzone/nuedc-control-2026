@@ -16,7 +16,6 @@ constructor_args:
       i_limit: 0.0
       out_limit: 30.0
       cycle: false
-  - base_target: 30
   - max_wheel_target: 60
   - outer_loop_divider: 2
   - max_control_dt_ms: 100
@@ -48,8 +47,8 @@ class LineTracker : public LibXR::Application
               const char* line_sample_topic_name,
               const char* chassis_command_topic_name,
               uint32_t control_period_ms, uint32_t line_timeout_ms,
-              PidParam line_pid, int32_t base_target,
-              int32_t max_wheel_target, uint8_t outer_loop_divider,
+              PidParam line_pid, int32_t max_wheel_target,
+              uint8_t outer_loop_divider,
               uint32_t max_control_dt_ms)
       : control_period_ms_(control_period_ms),
         line_timeout_ms_(line_timeout_ms),
@@ -60,8 +59,7 @@ class LineTracker : public LibXR::Application
         line_topic_(LibXR::Topic::CreateTopic<GreySensor::Sample>(
             line_sample_topic_name)),
         line_sub_(line_topic_),
-        command_topic_(LibXR::Topic::CreateTopic<Command>(chassis_command_topic_name)),
-        base_target_(base_target)
+        command_topic_(LibXR::Topic::CreateTopic<Command>(chassis_command_topic_name))
   {
     UNUSED(hw);
     ASSERT(line_sample_topic_name != nullptr && line_sample_topic_name[0] != '\0');
@@ -70,7 +68,6 @@ class LineTracker : public LibXR::Application
     ASSERT(control_period_ms_ > 0U);
     ASSERT(max_control_dt_ms_ >= control_period_ms_);
     ASSERT(max_wheel_target_ >= 0);
-    ASSERT(base_target_ >= 0 && base_target_ <= max_wheel_target_);
     ASSERT(outer_loop_divider_ > 0U);
     line_sub_.StartWaiting();
     last_control_ms_ = LibXR::Timebase::GetMilliseconds();
@@ -78,20 +75,15 @@ class LineTracker : public LibXR::Application
     app.Register(*this);
   }
 
-  void Start()
+  void Start(int32_t base_target)
   {
+    SetBaseTarget(base_target);
     if (!active_)
     {
       ResetControlState();
       active_ = true;
     }
     outer_update_pending_ = true;
-  }
-
-  void Start(int32_t base_target)
-  {
-    SetBaseTarget(base_target);
-    Start();
   }
 
   void Stop()
@@ -270,7 +262,7 @@ class LineTracker : public LibXR::Application
   LibXR::Topic command_topic_;
   GreySensor::Sample latest_line_sample_{};
   Command command_{};
-  int32_t base_target_;
+  int32_t base_target_ = 0;
   int32_t left_target_ = 0;
   int32_t right_target_ = 0;
   float outer_dt_seconds_ = 0.0F;
