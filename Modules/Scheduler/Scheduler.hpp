@@ -47,9 +47,8 @@ class MadgwickAHRS;
 class Scheduler : public LibXR::Application
 {
  public:
-  Scheduler(LibXR::HardwareContainer& hw, LibXR::ApplicationManager& app,
-            ICM42688& imu, MadgwickAHRS& ahrs,
-            DifferentialChassis& chassis, BitsButtonXR& buttons,
+  Scheduler(LibXR::HardwareContainer& hw, LibXR::ApplicationManager& app, ICM42688& imu,
+            MadgwickAHRS& ahrs, DifferentialChassis& chassis, BitsButtonXR& buttons,
             uint32_t control_period_ms, uint32_t diagnostic_period_ms,
             uint32_t display_period_ms, const char* display_frame_topic_name,
             uint16_t display_width, uint16_t display_height,
@@ -72,9 +71,8 @@ class Scheduler : public LibXR::Application
             CheckedTopicName(display_frame_topic_name))),
         display_canvas_(display_frame_.data.data(), display_framebuffer_size_,
                         display_width_, display_height_, display_width_),
-        line_sample_topic_(
-            LibXR::Topic::CreateTopic<GreySensor::Sample>(
-                CheckedTopicName(line_sample_topic_name))),
+        line_sample_topic_(LibXR::Topic::CreateTopic<GreySensor::Sample>(
+            CheckedTopicName(line_sample_topic_name))),
         line_sample_sub_(line_sample_topic_),
         diag_command_(LibXR::RamFS::CreateCommand<Scheduler*>("diag", DiagCommand, this))
   {
@@ -93,8 +91,8 @@ class Scheduler : public LibXR::Application
     ramfs_.Add(diag_command_);
     line_sample_sub_.StartWaiting();
 
-    WriteRttDiagnostic(BuildDiagnosticSnapshot(
-        latest_line_sample_, LibXR::Timebase::GetMilliseconds()));
+    WriteRttDiagnostic(
+        BuildDiagnosticSnapshot(latest_line_sample_, LibXR::Timebase::GetMilliseconds()));
 
     // Periodic work is driven by LibXR's soft timer, which the bare-metal backend
     // advances from Thread::Sleep in the main loop. No RTOS thread is required.
@@ -254,12 +252,12 @@ class Scheduler : public LibXR::Application
   static void AppendHexFixed(char*& out, size_t& remaining, uint32_t value,
                              uint8_t digits)
   {
-    static constexpr char kHex[] = "0123456789ABCDEF";
+    static constexpr char HEX[] = "0123456789ABCDEF";
     AppendText(out, remaining, "0x");
     for (uint8_t index = digits; index > 0U; index--)
     {
       const uint8_t shift = static_cast<uint8_t>((index - 1U) * 4U);
-      AppendChar(out, remaining, kHex[(value >> shift) & 0xFU]);
+      AppendChar(out, remaining, HEX[(value >> shift) & 0xFU]);
     }
   }
 
@@ -321,16 +319,17 @@ class Scheduler : public LibXR::Application
     const DiagnosticSnapshot diag =
         BuildDiagnosticSnapshot(latest_line_sample_, LibXR::Timebase::GetMilliseconds());
     LibXR::STDIO::Printf<
-        "diag seq=%lu t=%lu imu=%lu who=0x%02lX attitude=%lu yaw_mdeg=%ld "
+        "diag seq=%lu t=%lu imu=%lu who=0x%02lX isamp=%lu ierr=%ld ireg=0x%02lX "
+        "attitude=%lu yaw_mdeg=%ld "
         "line=0x%02lX pos=%ld lost=%lu\r\n">(
-        static_cast<uint32_t>(diag.sequence),
-        static_cast<uint32_t>(diag.timestamp_ms),
-        static_cast<uint32_t>(diag.imu_online),
-        static_cast<uint32_t>(diag.imu_who_am_i),
+        static_cast<uint32_t>(diag.sequence), static_cast<uint32_t>(diag.timestamp_ms),
+        static_cast<uint32_t>(diag.imu_online), static_cast<uint32_t>(diag.imu_who_am_i),
+        static_cast<uint32_t>(diag.imu_sample_count),
+        static_cast<int32_t>(diag.imu_last_error),
+        static_cast<uint32_t>(diag.imu_last_failed_register),
         static_cast<uint32_t>(diag.attitude_valid), static_cast<int32_t>(diag.yaw_mdeg),
         static_cast<uint32_t>(diag.line_active_mask),
-        static_cast<int32_t>(diag.line_position),
-        static_cast<uint32_t>(diag.line_lost));
+        static_cast<int32_t>(diag.line_position), static_cast<uint32_t>(diag.line_lost));
     return 0;
   }
 
@@ -493,6 +492,12 @@ class Scheduler : public LibXR::Application
     AppendUnsigned(out, remaining, diag.imu_online);
     AppendText(out, remaining, " who=");
     AppendHexFixed(out, remaining, diag.imu_who_am_i, 2U);
+    AppendText(out, remaining, " isamp=");
+    AppendUnsigned(out, remaining, diag.imu_sample_count);
+    AppendText(out, remaining, " ierr=");
+    AppendSigned(out, remaining, diag.imu_last_error);
+    AppendText(out, remaining, " ireg=");
+    AppendHexFixed(out, remaining, diag.imu_last_failed_register, 2U);
     AppendText(out, remaining, " attitude=");
     AppendUnsigned(out, remaining, diag.attitude_valid);
     AppendText(out, remaining, " yaw_mdeg=");
@@ -533,7 +538,7 @@ class Scheduler : public LibXR::Application
     }
     else
     {
-      canvas.DrawText(42, 32, "CAL");
+      canvas.DrawText(42, 32, imu_.IsOnline() ? "CAL" : "IMU!");
     }
 
     PublishDisplayFrame();
