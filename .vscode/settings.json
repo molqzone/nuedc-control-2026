@@ -6,10 +6,10 @@
   "cmake.buildBeforeRun": false,
   "cmake.configureSettings": {
     "CMAKE_BUILD_TYPE": "Debug",
-    "CMAKE_C_COMPILER": "D:/scoop/apps/gcc-arm-none-eabi/current/bin/arm-none-eabi-gcc.exe",
-    "CMAKE_CXX_COMPILER": "D:/scoop/apps/gcc-arm-none-eabi/current/bin/arm-none-eabi-g++.exe",
-    "CMAKE_ASM_COMPILER": "D:/scoop/apps/gcc-arm-none-eabi/current/bin/arm-none-eabi-gcc.exe",
-    "MSPM0_SDK_DIR": "D:/TI/M0_SDK/mspm0_sdk_2_10_00_04"
+    "CMAKE_C_COMPILER": "C:/Users/keruth/scoop/apps/gcc-arm-none-eabi/current/bin/arm-none-eabi-gcc.exe",
+    "CMAKE_CXX_COMPILER": "C:/Users/keruth/scoop/apps/gcc-arm-none-eabi/current/bin/arm-none-eabi-g++.exe",
+    "CMAKE_ASM_COMPILER": "C:/Users/keruth/scoop/apps/gcc-arm-none-eabi/current/bin/arm-none-eabi-gcc.exe",
+    "MSPM0_SDK_DIR": "${workspaceFolder}/mspm0-sdk"
   },
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "files.associations": {

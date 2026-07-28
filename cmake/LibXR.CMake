@@ -113,12 +113,6 @@ endif()
 add_subdirectory("${LIBXR_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/libxr")
 
 if(TARGET xr)
-    get_target_property(_libxr_sources xr SOURCES)
-    list(REMOVE_ITEM _libxr_sources
-        "${LIBXR_DIR}/src/driver/flash.cpp"
-        "${LIBXR_DIR}/src/middleware/database.cpp")
-    set_property(TARGET xr PROPERTY SOURCES "${_libxr_sources}")
-
     target_include_directories(xr PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/Core"
         ${MSPM0_COMMON_INCLUDE_DIRS})

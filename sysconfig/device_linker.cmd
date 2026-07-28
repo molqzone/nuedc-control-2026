@@ -37,11 +37,15 @@
 
 MEMORY
 {
-    FLASH           (RX)  : origin = 0x00000000, length = 0x00020000
+    FLASH           (RX)  : origin = 0x00000000, length = 0x0001F000
+    FLASH_DB        (R)   : origin = 0x0001F000, length = 0x00001000
     SRAM            (RWX) : origin = 0x20200000, length = 0x00008000
     BCR_CONFIG      (R)   : origin = 0x41C00000, length = 0x000000FF
     BSL_CONFIG      (R)   : origin = 0x41C00100, length = 0x00000080
 }
+
+__flash_db_start__ = ORIGIN(FLASH_DB);
+__flash_db_end__ = ORIGIN(FLASH_DB) + LENGTH(FLASH_DB);
 
 SECTIONS
 {

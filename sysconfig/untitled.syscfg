@@ -28,7 +28,7 @@ const I2C2  = I2C.addInstance();
 const PWM   = scripting.addModule("/ti/driverlib/PWM", {}, false);
 const PWM1  = PWM.addInstance();
 const UART  = scripting.addModule("/ti/driverlib/UART", {}, false);
-const UART1 = UART.addInstance();
+const UART2 = UART.addInstance();
 
 /**
  * Write custom configuration values to the imported modules.
@@ -184,20 +184,20 @@ PWM1.$name                      = "MOTOR_PWM";
 PWM1.ccIndex                    = [2,3];
 PWM1.pwmMode                    = "EDGE_ALIGN";
 PWM1.timerCount                 = 1600;
-PWM1.timerStartTimer            = true;
+PWM1.timerStartTimer            = false;
 PWM1.peripheral.$assign         = "TIMA0";
 PWM1.peripheral.ccp2Pin.$assign = "PB20";
 PWM1.peripheral.ccp3Pin.$assign = "PA28";
 PWM1.ccp2PinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric2";
 PWM1.ccp3PinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric3";
 
-UART1.$name             = "UART_0";
-UART1.enabledInterrupts = ["RX","TX"];
-UART1.targetBaudRate    = 2000000;
-UART1.peripheral.txPin.$assign = "PA10";
-UART1.peripheral.rxPin.$assign = "PA11";
-UART1.txPinConfig.$name = "ti_driverlib_gpio_GPIOPinGeneric0";
-UART1.rxPinConfig.$name = "ti_driverlib_gpio_GPIOPinGeneric1";
+UART2.$name             = "UART_2";
+UART2.enabledInterrupts = ["RX","TX"];
+UART2.targetBaudRate    = 9600;
+UART2.peripheral.txPin.$assign = "PB15";
+UART2.peripheral.rxPin.$assign = "PB16";
+UART2.txPinConfig.$name = "ti_driverlib_gpio_GPIOPinGeneric0";
+UART2.rxPinConfig.$name = "ti_driverlib_gpio_GPIOPinGeneric1";
 
 /**
  * Pinmux solution for unlocked pins/peripherals. This ensures that minor changes to the automatic solver in a future
@@ -209,4 +209,4 @@ Board.peripheral.$suggestSolution            = "DEBUGSS";
 Board.peripheral.swclkPin.$suggestSolution   = "j25_expansion.16";
 Board.peripheral.swdioPin.$suggestSolution   = "j25_expansion.14";
 SYSCTL.peripheral.$suggestSolution           = "SYSCTL";
-UART1.peripheral.$suggestSolution            = "UART0";
+UART2.peripheral.$suggestSolution            = "UART2";

@@ -88,7 +88,7 @@
     {
       "label": "J-Link: Flash",
       "type": "process",
-      "command": "C:\\Program Files\\SEGGER\\JLink_V854\\JLink.exe",
+      "command": "C:\\Program Files\\SEGGER\\JLink_V912\\JLink.exe",
       "args": [
         "-device",
         "MSPM0G3507",

@@ -3,7 +3,6 @@
 !/.vscode/settings.json
 !/.vscode/tasks.json
 !/.vscode/launch.json
-!/.vscode/jlink-flash.jlink
 *.o
 *.obj
 *.a
@@ -17,5 +16,17 @@
 *.hex
 *.map
 *.out
-/helloagents/
+
 /.cache/
+
+# XRobot modules are restored by the CLI from Modules/*.yaml.
+/Modules/*
+!/Modules/*.yaml
+
+# Project-specific business modules without remote module repos.
+!/Modules/Scheduler/
+!/Modules/Scheduler/**
+!/Modules/LineTracker/
+!/Modules/LineTracker/**
+!/Modules/SimpleDicision/
+!/Modules/SimpleDicision/**

@@ -1,16 +1,20 @@
 global_settings:
   monitor_sleep_ms: 1
 modules:
-- id: display_surface
-  name: DisplaySurface
-  constructor_args:
-    config:
-      expr: DisplaySurface::Config{128, 64, "display_frame", 33}
 - id: ssd1306
   name: SSD1306
   constructor_args:
-    config:
-      expr: SSD1306::Config{"i2c_oled", 0x3C, 128, 64, "display_frame", 64}
+    i2c_alias: i2c_oled
+    address: 0x3C
+    width: 128
+    height: 64
+    chunk_bytes: 64
+- id: display_surface
+  name: DisplaySurface
+  constructor_args:
+    screen: "@ssd1306"
+    frame_topic_name: display_frame
+    refresh_interval_ms: 33
 - id: icm42688
   name: ICM42688
   constructor_args:
@@ -32,14 +36,148 @@ modules:
     beta: 0.05
     gyro_topic_name: icm42688_gyro
     accl_topic_name: icm42688_accl
-# Board-local User object. It is instantiated here for dependency injection,
-# but its source is not managed as a reusable XRobot module.
-- id: firmware_runtime
-  name: FirmwareRuntime
+- id: buttons
+  name: BitsButtonXR
   constructor_args:
-    ahrs: '@ahrs'
-    imu: '@icm42688'
-    surface: '@display_surface'
-    display: '@ssd1306'
-    config:
-      expr: FirmwareRuntime::Config{"ramfs", "console", 10, 1000, 100}
+    single_buttons:
+    - key_alias: key1
+      active_level: false
+      constraints:
+        short_press_time_ms: 50
+        long_press_start_time_ms: 1000
+        long_press_period_triger_ms: 500
+        time_window_time_ms: 300
+    - key_alias: key2
+      active_level: false
+      constraints:
+        short_press_time_ms: 50
+        long_press_start_time_ms: 1000
+        long_press_period_triger_ms: 500
+        time_window_time_ms: 300
+    - key_alias: key3
+      active_level: false
+      constraints:
+        short_press_time_ms: 50
+        long_press_start_time_ms: 1000
+        long_press_period_triger_ms: 500
+        time_window_time_ms: 300
+    - key_alias: key4
+      active_level: false
+      constraints:
+        short_press_time_ms: 50
+        long_press_start_time_ms: 1000
+        long_press_period_triger_ms: 500
+        time_window_time_ms: 300
+    combined_buttons: []
+- id: line_sensors
+  name: GreySensor
+  constructor_args:
+    channel_names:
+    - line_ad1
+    - line_ad2
+    - line_ad3
+    - line_ad4
+    - line_ad5
+    - line_ad6
+    - line_ad7
+    - line_ad8
+    active_low: true
+    topic_name: line_sensors
+    publish_period_ms: 10
+    pull:
+      expr: LibXR::GPIO::Pull::UP
+- id: left_motor
+  name: DRV8870Motor
+  constructor_args:
+    enable_pwm_name: motor_a_pwm
+    n_sleep_name: motor_ain1
+    phase_name: motor_ain2
+    encoder_phase_a_name: encoder_1a
+    encoder_phase_b_name: encoder_1b
+    reversed: false
+    encoder_reversed: false
+    duty_deadband: 0.08
+    max_duty: 0.90
+    speed_pid:
+      k: 1.0
+      p: 0.0125
+      i: 0.0
+      d: 0.0
+      i_limit: 0.0
+      out_limit: 0.90
+      cycle: false
+- id: right_motor
+  name: DRV8870Motor
+  constructor_args:
+    enable_pwm_name: motor_b_pwm
+    n_sleep_name: motor_bin1
+    phase_name: motor_bin2
+    encoder_phase_a_name: encoder_2a
+    encoder_phase_b_name: encoder_2b
+    reversed: false
+    encoder_reversed: true
+    duty_deadband: 0.08
+    max_duty: 0.90
+    speed_pid:
+      k: 1.0
+      p: 0.0125
+      i: 0.0
+      d: 0.0
+      i_limit: 0.0
+      out_limit: 0.90
+      cycle: false
+- id: chassis
+  name: DifferentialChassis
+  constructor_args:
+    left_motor: "@&left_motor"
+    right_motor: "@&right_motor"
+    command_topic_name: chassis_command
+    command_timeout_ms: 100
+    nominal_dt_seconds: 0.010
+    max_dt_seconds: 0.100
+- id: line_tracker
+  name: LineTracker
+  constructor_args:
+    line_sample_topic_name: line_sensors
+    chassis_command_topic_name: chassis_command
+    control_period_ms: 10
+    line_timeout_ms: 100
+    line_pid:
+      k: 1.0
+      p: 3.0
+      i: 0.0
+      d: 0.0
+      i_limit: 0.0
+      out_limit: 30.0
+      cycle: false
+    base_target: 30
+    max_wheel_target: 60
+    outer_loop_divider: 2
+    max_control_dt_ms: 100
+- id: simple_dicision
+  name: SimpleDicision
+  constructor_args:
+    line_tracker: "@line_tracker"
+    chassis: "@chassis"
+    auto_start: false
+    line_base_target: 30
+    target_laps: 1
+    outer_square_side_mm: 1000.0
+    line_width_mm: 18.0
+    line_width_tolerance_mm: 2.0
+    wheel_diameter_mm: 65.0
+    encoder_counts_per_revolution: 1560.0
+- id: scheduler
+  name: Scheduler
+  constructor_args:
+    imu: "@icm42688"
+    ahrs: "@ahrs"
+    chassis: "@chassis"
+    buttons: "@buttons"
+    control_period_ms: 10
+    diagnostic_period_ms: 1000
+    display_period_ms: 100
+    display_frame_topic_name: display_frame
+    display_width: 128
+    display_height: 64
+    line_sample_topic_name: line_sensors

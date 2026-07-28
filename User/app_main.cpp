@@ -3,150 +3,71 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
 
+#include "SEGGER_RTT.h"
 #include "database.hpp"
 #include "libxr.hpp"
+#include "motor_pwm/mspm0_motor_pwm.hpp"
+#include "mspm0_flash.hpp"
 #include "mspm0_gpio.hpp"
 #include "mspm0_i2c.hpp"
-#include "mspm0_pwm.hpp"
 #include "mspm0_timebase.hpp"
 #include "mspm0_uart.hpp"
 #include "ramfs.hpp"
 #include "ti_msp_dl_config.h"
 #include "xrobot_main.hpp"
 
-class UserRamDatabase : public LibXR::Database
+extern "C"
 {
- private:
-  static constexpr std::size_t MAX_ENTRIES = 8;
-  static constexpr std::size_t MAX_NAME_LEN = 48;
-  static constexpr std::size_t MAX_DATA_SIZE = 64;
-
-  struct Entry
-  {
-    bool used = false;
-    std::array<char, MAX_NAME_LEN> name{};
-    std::array<std::uint8_t, MAX_DATA_SIZE> data{};
-    std::size_t size = 0;
-  };
-
-  Entry* FindEntry(const char* name)
-  {
-    for (auto& entry : entries_)
-    {
-      if (entry.used && std::strcmp(entry.name.data(), name) == 0)
-      {
-        return &entry;
-      }
-    }
-    return nullptr;
-  }
-
-  LibXR::ErrorCode Get(KeyBase& key) override
-  {
-    auto* entry = FindEntry(key.name_);
-    if (entry == nullptr)
-    {
-      return LibXR::ErrorCode::NOT_FOUND;
-    }
-    if (key.raw_data_.size_ < entry->size)
-    {
-      return LibXR::ErrorCode::FAILED;
-    }
-
-    std::memcpy(key.raw_data_.addr_, entry->data.data(), entry->size);
-    return LibXR::ErrorCode::OK;
-  }
-
-  LibXR::ErrorCode Set(KeyBase& key, LibXR::RawData data) override
-  {
-    if (data.size_ > MAX_DATA_SIZE || key.raw_data_.size_ < data.size_)
-    {
-      return LibXR::ErrorCode::FULL;
-    }
-
-    auto* entry = FindEntry(key.name_);
-    if (entry == nullptr)
-    {
-      const LibXR::ErrorCode add_result = Add(key);
-      if (add_result != LibXR::ErrorCode::OK)
-      {
-        return add_result;
-      }
-      entry = FindEntry(key.name_);
-    }
-
-    std::memcpy(key.raw_data_.addr_, data.addr_, data.size_);
-    std::memcpy(entry->data.data(), data.addr_, data.size_);
-    entry->size = data.size_;
-    return LibXR::ErrorCode::OK;
-  }
-
-  LibXR::ErrorCode Add(KeyBase& key) override
-  {
-    if (key.raw_data_.size_ > MAX_DATA_SIZE ||
-        std::strlen(key.name_) >= MAX_NAME_LEN)
-    {
-      return LibXR::ErrorCode::FULL;
-    }
-
-    auto* entry = FindEntry(key.name_);
-    if (entry != nullptr)
-    {
-      return Set(key, key.raw_data_);
-    }
-
-    for (auto& candidate : entries_)
-    {
-      if (!candidate.used)
-      {
-        candidate.used = true;
-        std::strncpy(candidate.name.data(), key.name_, MAX_NAME_LEN - 1);
-        candidate.name[MAX_NAME_LEN - 1] = '\0';
-        std::memcpy(candidate.data.data(), key.raw_data_.addr_, key.raw_data_.size_);
-        candidate.size = key.raw_data_.size_;
-        return LibXR::ErrorCode::OK;
-      }
-    }
-
-    return LibXR::ErrorCode::FULL;
-  }
-
-  std::array<Entry, MAX_ENTRIES> entries_{};
-};
+  extern std::uint8_t __flash_db_start__;  // NOLINT
+  extern std::uint8_t __flash_db_end__;    // NOLINT
+}
 
 extern "C" void app_main()
 {
   static LibXR::MSPM0Timebase timebase;
   LibXR::PlatformInit();
+  SEGGER_RTT_Init();
 
   NVIC_SetPriority(GPIOA_INT_IRQn, 1U);
   NVIC_SetPriority(GPIOB_INT_IRQn, 1U);
-  NVIC_SetPriority(UART_0_INST_INT_IRQN, 2U);
+  NVIC_SetPriority(UART_2_INST_INT_IRQN, 2U);
   NVIC_SetPriority(SysTick_IRQn, 3U);
 
   static std::array<uint8_t, 256> uart_rx_stage_buffer{};
   static std::array<uint8_t, 32> i2c_icm42688_stage_buffer{};
   static std::array<uint8_t, 8> i2c_oled_stage_buffer{};
   static LibXR::RamFS ramfs("ramfs");
-  static UserRamDatabase database;
 
-  static LibXR::MSPM0UART uart(MSPM0_UART_INIT(UART_0, uart_rx_stage_buffer.data(),
+  // NOLINTBEGIN(readability-identifier-naming)
+  const auto flash_db_start = reinterpret_cast<std::uintptr_t>(&__flash_db_start__);
+  const auto flash_db_end = reinterpret_cast<std::uintptr_t>(&__flash_db_end__);
+
+  ASSERT(flash_db_end > flash_db_start);
+  // NOLINTEND(readability-identifier-naming)
+
+  static LibXR::MSPM0Flash database_flash(static_cast<std::uint32_t>(flash_db_start),
+                                          flash_db_end - flash_db_start);
+  static LibXR::DatabaseRaw<LibXR::MSPM0Flash::MIN_WRITE_SIZE_BYTES> database(
+      database_flash, 32);
+
+  static LibXR::MSPM0UART uart(MSPM0_UART_INIT(UART_2, uart_rx_stage_buffer.data(),
                                                uart_rx_stage_buffer.size(), 16, 512));
   static LibXR::MSPM0I2C i2c_icm42688(
       MSPM0_I2C_INIT(I2C_0, i2c_icm42688_stage_buffer.data(),
                      i2c_icm42688_stage_buffer.size(), 8),
       LibXR::I2C::Configuration{I2C_0_BUS_SPEED_HZ});
   static LibXR::MSPM0I2C i2c_oled(
-      MSPM0_I2C_INIT(I2C_1, i2c_oled_stage_buffer.data(),
-                     i2c_oled_stage_buffer.size(), 0xFFFFFFFFU),
+      MSPM0_I2C_INIT(I2C_1, i2c_oled_stage_buffer.data(), i2c_oled_stage_buffer.size(),
+                     0xFFFFFFFFU),
       LibXR::I2C::Configuration{I2C_1_BUS_SPEED_HZ});
 
-  static LibXR::MSPM0PWM motor_a_pwm(
-      {MOTOR_PWM_INST, GPIO_MOTOR_PWM_C3_IDX, MOTOR_PWM_INST_CLK_FREQ});
-  static LibXR::MSPM0PWM motor_b_pwm(
-      {MOTOR_PWM_INST, GPIO_MOTOR_PWM_C2_IDX, MOTOR_PWM_INST_CLK_FREQ});
+  static SimpleMotorModule::MSPM0MotorPWM motor_a_pwm(
+      {MOTOR_PWM_INST, GPIO_MOTOR_PWM_C3_IDX, MOTOR_PWM_INST_CLK_FREQ},
+      DL_TIMERA_CCP3_DIS_OUT_ADV_FORCE_LOW, DL_TIMERA_CCP3_DIS_OUT_ADV_SET_BY_OCTL);
+  static SimpleMotorModule::MSPM0MotorPWM motor_b_pwm(
+      {MOTOR_PWM_INST, GPIO_MOTOR_PWM_C2_IDX, MOTOR_PWM_INST_CLK_FREQ},
+      DL_TIMERA_CCP2_DIS_OUT_ADV_FORCE_LOW, DL_TIMERA_CCP2_DIS_OUT_ADV_SET_BY_OCTL);
 
   static LibXR::MSPM0GPIO motor_ain1(MOTOR_AIN1_PORT, MOTOR_AIN1_AIN1_PIN,
                                      MOTOR_AIN1_AIN1_IOMUX);
@@ -157,34 +78,22 @@ extern "C" void app_main()
   static LibXR::MSPM0GPIO motor_bin2(MOTOR_BIN2_PORT, MOTOR_BIN2_BIN2_PIN,
                                      MOTOR_BIN2_BIN2_IOMUX);
 
-  static LibXR::MSPM0GPIO encoder_1a(ENCODERS_PORT, ENCODERS_E1A_PIN,
-                                     ENCODERS_E1A_IOMUX);
-  static LibXR::MSPM0GPIO encoder_1b(ENCODERS_PORT, ENCODERS_E1B_PIN,
-                                     ENCODERS_E1B_IOMUX);
-  static LibXR::MSPM0GPIO encoder_2a(ENCODERS_PORT, ENCODERS_E2A_PIN,
-                                     ENCODERS_E2A_IOMUX);
-  static LibXR::MSPM0GPIO encoder_2b(ENCODERS_PORT, ENCODERS_E2B_PIN,
-                                     ENCODERS_E2B_IOMUX);
+  static LibXR::MSPM0GPIO encoder_1a(ENCODERS_PORT, ENCODERS_E1A_PIN, ENCODERS_E1A_IOMUX);
+  static LibXR::MSPM0GPIO encoder_1b(ENCODERS_PORT, ENCODERS_E1B_PIN, ENCODERS_E1B_IOMUX);
+  static LibXR::MSPM0GPIO encoder_2a(ENCODERS_PORT, ENCODERS_E2A_PIN, ENCODERS_E2A_IOMUX);
+  static LibXR::MSPM0GPIO encoder_2b(ENCODERS_PORT, ENCODERS_E2B_PIN, ENCODERS_E2B_IOMUX);
 
   static LibXR::MSPM0GPIO icm42688_int(ICM42688_INT_PORT, ICM42688_INT_INT1_PIN,
                                        ICM42688_INT_INT1_IOMUX);
 
-  static LibXR::MSPM0GPIO line_ad1(LINE_A_PORT, LINE_A_AD1_PIN,
-                                   LINE_A_AD1_IOMUX);
-  static LibXR::MSPM0GPIO line_ad2(LINE_B_PORT, LINE_B_AD2_PIN,
-                                   LINE_B_AD2_IOMUX);
-  static LibXR::MSPM0GPIO line_ad3(LINE_B_PORT, LINE_B_AD3_PIN,
-                                   LINE_B_AD3_IOMUX);
-  static LibXR::MSPM0GPIO line_ad4(LINE_B_PORT, LINE_B_AD4_PIN,
-                                   LINE_B_AD4_IOMUX);
-  static LibXR::MSPM0GPIO line_ad5(LINE_B_PORT, LINE_B_AD5_PIN,
-                                   LINE_B_AD5_IOMUX);
-  static LibXR::MSPM0GPIO line_ad6(LINE_A_PORT, LINE_A_AD6_PIN,
-                                   LINE_A_AD6_IOMUX);
-  static LibXR::MSPM0GPIO line_ad7(LINE_A_PORT, LINE_A_AD7_PIN,
-                                   LINE_A_AD7_IOMUX);
-  static LibXR::MSPM0GPIO line_ad8(LINE_A_PORT, LINE_A_AD8_PIN,
-                                   LINE_A_AD8_IOMUX);
+  static LibXR::MSPM0GPIO line_ad1(LINE_A_PORT, LINE_A_AD1_PIN, LINE_A_AD1_IOMUX);
+  static LibXR::MSPM0GPIO line_ad2(LINE_B_PORT, LINE_B_AD2_PIN, LINE_B_AD2_IOMUX);
+  static LibXR::MSPM0GPIO line_ad3(LINE_B_PORT, LINE_B_AD3_PIN, LINE_B_AD3_IOMUX);
+  static LibXR::MSPM0GPIO line_ad4(LINE_B_PORT, LINE_B_AD4_PIN, LINE_B_AD4_IOMUX);
+  static LibXR::MSPM0GPIO line_ad5(LINE_B_PORT, LINE_B_AD5_PIN, LINE_B_AD5_IOMUX);
+  static LibXR::MSPM0GPIO line_ad6(LINE_A_PORT, LINE_A_AD6_PIN, LINE_A_AD6_IOMUX);
+  static LibXR::MSPM0GPIO line_ad7(LINE_A_PORT, LINE_A_AD7_PIN, LINE_A_AD7_IOMUX);
+  static LibXR::MSPM0GPIO line_ad8(LINE_A_PORT, LINE_A_AD8_PIN, LINE_A_AD8_IOMUX);
 
   static LibXR::MSPM0GPIO key1(KEYS_KEY1_PORT, KEYS_KEY1_PIN, KEYS_KEY1_IOMUX);
   static LibXR::MSPM0GPIO key2(KEYS_KEY2_PORT, KEYS_KEY2_PIN, KEYS_KEY2_IOMUX);

@@ -18,15 +18,15 @@ set(LIBXR_LOG_OUTPUT_LEVEL -1)
 
 include("${CMAKE_SOURCE_DIR}/cmake/LibXR.CMake")
 
+set(SEGGER_RTT_INCLUDE_DIRS
+    "${CMAKE_SOURCE_DIR}/third-party/SEGGER-RTT/Config"
+    "${CMAKE_SOURCE_DIR}/third-party/SEGGER-RTT/RTT")
+
 set(FIRMWARE_SOURCES
     "${CMAKE_SOURCE_DIR}/User/main.c"
     "${CMAKE_SOURCE_DIR}/User/app_main.cpp"
-    "${CMAKE_SOURCE_DIR}/User/src/FirmwareRuntime.cpp"
-    "${CMAKE_SOURCE_DIR}/User/src/drivebase.cpp"
-    "${CMAKE_SOURCE_DIR}/User/src/key_led.cpp"
-    "${CMAKE_SOURCE_DIR}/User/src/line_sensors.cpp"
-    "${CMAKE_SOURCE_DIR}/User/src/motion_control.cpp"
     "${CMAKE_SOURCE_DIR}/Core/syscalls_stub.c"
+    "${CMAKE_SOURCE_DIR}/third-party/SEGGER-RTT/RTT/SEGGER_RTT.c"
     "${MSPM0_STARTUP_FILE}"
     "${SYSCFG_C_FILE}")
 
@@ -35,7 +35,7 @@ add_executable(${PROJECT_NAME}.elf ${FIRMWARE_SOURCES})
 target_include_directories(${PROJECT_NAME}.elf PRIVATE
     "${CMAKE_SOURCE_DIR}/Core"
     "${CMAKE_SOURCE_DIR}/User"
-    "${CMAKE_SOURCE_DIR}/User/src"
+    ${SEGGER_RTT_INCLUDE_DIRS}
     ${MSPM0_COMMON_INCLUDE_DIRS})
 
 target_compile_definitions(${PROJECT_NAME}.elf PRIVATE
@@ -60,10 +60,13 @@ target_compile_options(${PROJECT_NAME}.elf PRIVATE
     $<$<COMPILE_LANGUAGE:CXX>:-fpermissive>)
 
 target_link_libraries(${PROJECT_NAME}.elf PRIVATE xr m)
+target_include_directories(xr PRIVATE ${SEGGER_RTT_INCLUDE_DIRS})
 target_compile_options(xr PRIVATE
     -ffunction-sections
     -fdata-sections
-    -Os)
+    -Os
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
 target_link_options(${PROJECT_NAME}.elf PRIVATE
     -mcpu=cortex-m0plus
     -mthumb

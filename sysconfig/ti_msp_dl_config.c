@@ -55,7 +55,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_init(void)
     SYSCFG_DL_MOTOR_PWM_init();
     SYSCFG_DL_I2C_0_init();
     SYSCFG_DL_I2C_1_init();
-    SYSCFG_DL_UART_0_init();
+    SYSCFG_DL_UART_2_init();
     SYSCFG_DL_DMA_init();
     /* Ensure backup structures have no valid state */
 	gMOTOR_PWMBackup.backupRdy 	= false;
@@ -92,7 +92,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_TimerA_reset(MOTOR_PWM_INST);
     DL_I2C_reset(I2C_0_INST);
     DL_I2C_reset(I2C_1_INST);
-    DL_UART_Main_reset(UART_0_INST);
+    DL_UART_Main_reset(UART_2_INST);
 
 
     DL_GPIO_enablePower(GPIOA);
@@ -100,7 +100,7 @@ SYSCONFIG_WEAK void SYSCFG_DL_initPower(void)
     DL_TimerA_enablePower(MOTOR_PWM_INST);
     DL_I2C_enablePower(I2C_0_INST);
     DL_I2C_enablePower(I2C_1_INST);
-    DL_UART_Main_enablePower(UART_0_INST);
+    DL_UART_Main_enablePower(UART_2_INST);
 
     delay_cycles(POWER_STARTUP_DELAY);
 }
@@ -135,9 +135,9 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
     DL_GPIO_enableHiZ(GPIO_I2C_1_IOMUX_SCL);
 
     DL_GPIO_initPeripheralOutputFunction(
-        GPIO_UART_0_IOMUX_TX, GPIO_UART_0_IOMUX_TX_FUNC);
+        GPIO_UART_2_IOMUX_TX, GPIO_UART_2_IOMUX_TX_FUNC);
     DL_GPIO_initPeripheralInputFunction(
-        GPIO_UART_0_IOMUX_RX, GPIO_UART_0_IOMUX_RX_FUNC);
+        GPIO_UART_2_IOMUX_RX, GPIO_UART_2_IOMUX_RX_FUNC);
 
     DL_GPIO_initDigitalOutput(GPIO_GRP_0_PIN_0_IOMUX);
 
@@ -267,7 +267,7 @@ static const DL_TimerA_PWMConfig gMOTOR_PWMConfig = {
     .pwmMode = DL_TIMER_PWM_MODE_EDGE_ALIGN,
     .period = 1600,
     .isTimerWithFourCC = true,
-    .startTimer = DL_TIMER_START,
+    .startTimer = DL_TIMER_STOP,
 };
 
 SYSCONFIG_WEAK void SYSCFG_DL_MOTOR_PWM_init(void) {
@@ -356,12 +356,12 @@ SYSCONFIG_WEAK void SYSCFG_DL_I2C_1_init(void) {
 
 }
 
-static const DL_UART_Main_ClockConfig gUART_0ClockConfig = {
+static const DL_UART_Main_ClockConfig gUART_2ClockConfig = {
     .clockSel    = DL_UART_MAIN_CLOCK_BUSCLK,
     .divideRatio = DL_UART_MAIN_CLOCK_DIVIDE_RATIO_1
 };
 
-static const DL_UART_Main_Config gUART_0Config = {
+static const DL_UART_Main_Config gUART_2Config = {
     .mode        = DL_UART_MAIN_MODE_NORMAL,
     .direction   = DL_UART_MAIN_DIRECTION_TX_RX,
     .flowControl = DL_UART_MAIN_FLOW_CONTROL_NONE,
@@ -370,27 +370,27 @@ static const DL_UART_Main_Config gUART_0Config = {
     .stopBits    = DL_UART_MAIN_STOP_BITS_ONE
 };
 
-SYSCONFIG_WEAK void SYSCFG_DL_UART_0_init(void)
+SYSCONFIG_WEAK void SYSCFG_DL_UART_2_init(void)
 {
-    DL_UART_Main_setClockConfig(UART_0_INST, (DL_UART_Main_ClockConfig *) &gUART_0ClockConfig);
+    DL_UART_Main_setClockConfig(UART_2_INST, (DL_UART_Main_ClockConfig *) &gUART_2ClockConfig);
 
-    DL_UART_Main_init(UART_0_INST, (DL_UART_Main_Config *) &gUART_0Config);
+    DL_UART_Main_init(UART_2_INST, (DL_UART_Main_Config *) &gUART_2Config);
     /*
      * Configure baud rate by setting oversampling and baud rate divisors.
-     *  Target baud rate: 2000000
-     *  Actual baud rate: 2000000
+     *  Target baud rate: 9600
+     *  Actual baud rate: 9600.24
      */
-    DL_UART_Main_setOversampling(UART_0_INST, DL_UART_OVERSAMPLING_RATE_16X);
-    DL_UART_Main_setBaudRateDivisor(UART_0_INST, UART_0_IBRD_32_MHZ_2000000_BAUD, UART_0_FBRD_32_MHZ_2000000_BAUD);
+    DL_UART_Main_setOversampling(UART_2_INST, DL_UART_OVERSAMPLING_RATE_16X);
+    DL_UART_Main_setBaudRateDivisor(UART_2_INST, UART_2_IBRD_32_MHZ_9600_BAUD, UART_2_FBRD_32_MHZ_9600_BAUD);
 
 
     /* Configure Interrupts */
-    DL_UART_Main_enableInterrupt(UART_0_INST,
+    DL_UART_Main_enableInterrupt(UART_2_INST,
                                  DL_UART_MAIN_INTERRUPT_RX |
                                  DL_UART_MAIN_INTERRUPT_TX);
 
 
-    DL_UART_Main_enable(UART_0_INST);
+    DL_UART_Main_enable(UART_2_INST);
 }
 
 static const DL_DMA_Config gDMA_CH_TXConfig = {

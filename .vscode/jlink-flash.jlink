@@ -1,6 +1,0 @@
-r
-h
-loadfile build\ti_mspm0_libxr_dev.elf
-r
-g
-q

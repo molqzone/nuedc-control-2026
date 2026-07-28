@@ -12,7 +12,7 @@
       "runToEntryPoint": "main",
       "executable": "${workspaceFolder}/build/ti_mspm0_libxr_dev.elf",
       "preLaunchTask": "CMake: Build",
-      "serverpath": "C:/Program Files/SEGGER/JLink_V854/JLinkGDBServerCL.exe",
+      "serverpath": "C:/Program Files/SEGGER/JLink_V912/JLinkGDBServerCL.exe",
       "serverArgs": [
         "-speed",
         "4000",
@@ -33,7 +33,7 @@
       "device": "MSPM0G3507",
       "interface": "swd",
       "executable": "${workspaceFolder}/build/ti_mspm0_libxr_dev.elf",
-      "serverpath": "C:/Program Files/SEGGER/JLink_V854/JLinkGDBServerCL.exe",
+      "serverpath": "C:/Program Files/SEGGER/JLink_V912/JLinkGDBServerCL.exe",
       "serverArgs": [
         "-speed",
         "4000",

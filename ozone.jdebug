@@ -22,8 +22,13 @@ void OnProjectLoad (void) {
   //
   // Dialog-generated settings
   //
-  Project.AddPathSubstitute ("/home/keruth/Projects/ti-mspm0-libxr-dev", "$(ProjectDir)");
-  Project.AddPathSubstitute ("/home/keruth/projects/ti-mspm0-libxr-dev", "$(ProjectDir)");
+  Project.AddPathSubstitute ("D:/Projects/nuedc-control-2026", "$(ProjectDir)");
+  //
+  // Path substitution for the original build source paths
+  // (debug info contains paths from the build machine)
+  //
+  Project.AddPathSubstitute ("D:/TI/Project/MSPM0G3507_LibXR_Template_fresh", "$(ProjectDir)");
+  Project.AddPathSubstitute ("D:/TI/M0_SDK/mspm0_sdk_2_10_00_04", "$(ProjectDir)/mspm0-sdk");
   Project.SetDevice ("MSPM0G3507");
   Project.SetHostIF ("USB", "");
   Project.SetTargetIF ("SWD");
@@ -43,10 +48,23 @@ void OnProjectLoad (void) {
 *   Called when program execution has reached/passed
 *   the startup completion point. Optional.
 *
+*   This handler sets a breakpoint at main() so the debugger
+*   stops there instead of letting the program run free
+*   (which can trigger watchdog resets).
+*
 **********************************************************************
 */
-//void OnStartupComplete (void) {
-//}
+void OnStartupComplete (void) {
+  //
+  // Halt at main() entry
+  //
+  Debug.Halt();
+  Util.Sleep(100);
+  if (Elf.GetSymbolAddr("main") != 0xFFFFFFFF) {
+    Target.BreakSet(Elf.GetSymbolAddr("main"));
+    Debug.Continue();
+  }
+}
 
 /*********************************************************************
 *

@@ -1,6 +1,10 @@
 modules:
 - verdancy-org/GreySensor
-- verdancy-org/SSD1306
 - verdancy-org/DisplaySurface
-- xrobot-org/ICM42688
+- verdancy-org/SSD1306
+- verdancy-org/ICM42688
 - xrobot-org/MadgwickAHRS
+- verdancy-org/BitsButtonXR@master
+- verdancy-org/SimpleMotor
+- verdancy-org/DRV8870Motor
+- verdancy-org/DifferentialChassis
