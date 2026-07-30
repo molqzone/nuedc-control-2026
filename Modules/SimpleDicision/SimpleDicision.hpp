@@ -49,7 +49,7 @@ class SimpleDicision : public LibXR::Application
       : ramfs_(*hw.FindOrExit<LibXR::RamFS>({"ramfs"})),
         line_tracker_(line_tracker),
         chassis_(chassis),
-        auto_start_(false),
+        auto_start_(auto_start),
         line_base_target_(line_base_target),
         target_laps_(target_laps),
         outer_square_side_mm_(outer_square_side_mm),
@@ -62,7 +62,6 @@ class SimpleDicision : public LibXR::Application
         drive_command_(
             LibXR::RamFS::CreateCommand<SimpleDicision*>("drive", DriveCommand, this))
   {
-    UNUSED(auto_start);
     ASSERT(line_base_target_ >= 0);
     ASSERT(std::isfinite(outer_square_side_mm_) && outer_square_side_mm_ > 0.0F);
     ASSERT(std::isfinite(line_width_mm_) && line_width_mm_ > 0.0F);

@@ -2,8 +2,8 @@
 #include "libxr.hpp"
 
 // Module headers
-#include "DisplaySurface.hpp"
 #include "SSD1306.hpp"
+#include "DisplaySurface.hpp"
 #include "ICM42688.hpp"
 #include "MadgwickAHRS.hpp"
 #include "BitsButtonXR.hpp"
@@ -44,7 +44,7 @@ static void XRobotMain(LibXR::HardwareContainer &hw) {
       hw,
       appmgr,
       {"line_ad1", "line_ad2", "line_ad3", "line_ad4", "line_ad5", "line_ad6", "line_ad7", "line_ad8"},
-      false,
+      true,
       "line_sensors",
       10,
       LibXR::GPIO::Pull::UP
@@ -72,7 +72,7 @@ static void XRobotMain(LibXR::HardwareContainer &hw) {
       "encoder_2a",
       "encoder_2b",
       false,
-      false,
+      true,
       0.08,
       0.9,
       {1.0, 0.0125, 0.0, 0.0, 0.0, 0.9, false}
@@ -104,7 +104,7 @@ static void XRobotMain(LibXR::HardwareContainer &hw) {
       appmgr,
       line_tracker,
       chassis,
-      true,
+      false,
       30,
       1,
       1000.0,

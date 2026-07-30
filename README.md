@@ -216,10 +216,8 @@ drive state=line segment=A->B lap=0/1 dist=12.3/982.0mm wheel=65.0mm cpr=1560.0 
 | `line` | 赛道宽度 + 容差 (mm) |
 | `left` / `right` | 左右编码器本次增量 |
 
-> ⚠️ **自动启动：** `SimpleDicision` 构造函数中 `auto_start_` 当前被硬编码为 `false`，
-> 即使 `xrobot_main.hpp` 传入 `auto_start = true` 也不会自启。
-> 如需上电自启，将构造函数初始化列表中 `auto_start_(false)` 改为 `auto_start_(auto_start)`。
-> 注意：Agent 无人值守调试时请确保轮子悬空或拆卸，防止意外移动。
+> ⚠️ **自动启动：** `SimpleDicision` 现在会遵循 `xrobot.yaml` 中的 `auto_start`。
+> 无人值守调试时建议保持 `auto_start: false`；如果改为 `true`，请确保轮子悬空或拆卸，防止意外移动。
 
 #### `chassis` — 底盘控制
 
